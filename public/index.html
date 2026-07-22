@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vardiya Görüntüleyici</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="app">
+
+
+    <!-- ═══ LOGIN MODAL ═══ -->
+    <div class="modal-overlay" id="loginModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>EPMS Oturum Aç</h2>
+          <button class="modal-close" onclick="closeLoginModal()">✕</button>
+        </div>
+        <div class="error-message" id="loginError"></div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Kullanıcı Adı</label>
+            <input type="text" id="username" required placeholder="EPMS kullanıcı adınız" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="password">Şifre</label>
+            <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-primary" id="loginBtn">
+            <span class="spinner"></span>
+            <span class="btn-text">Giriş Yap</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══ ARCHIVE MODAL ═══ -->
+    <div class="modal-overlay" id="archiveModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>🗄️ Arşiv Kayıtları</h2>
+          <button class="modal-close" onclick="closeArchiveModal()">✕</button>
+        </div>
+        <div class="archive-list" id="archiveList">
+          <!-- Archives will be listed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STATS MODAL ═══ -->
+    <div class="modal-overlay" id="statsModal">
+      <div class="modal-card stats-modal">
+        <div class="modal-header">
+          <h2>📊 İstatistikler</h2>
+          <button class="modal-close" onclick="closeStatsModal()">✕</button>
+        </div>
+        <div class="stats-controls">
+          <button class="btn-secondary active" id="btnOverallStats" onclick="showOverallStats()">Tüm İşletme</button>
+          <div class="person-select-wrapper">
+            <select id="personStatsSelect" onchange="showPersonStats(this.value)">
+              <option value="">Kişi Seçin...</option>
+            </select>
+          </div>
+        </div>
+        <div class="stats-content" id="statsContent">
+          <!-- Stats will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DELETE CONFIRM MODAL ═══ -->
+    <div class="modal-overlay" id="deleteConfirmModal" style="z-index: 2000;">
+      <div class="modal-card confirm-modal">
+        <div class="modal-header">
+          <h2>⚠️ Silme Onayı</h2>
+        </div>
+        <div class="modal-body" style="padding: 20px 0; text-align: center;">
+          Bu arşiv kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 10px; justify-content: center;">
+          <button class="btn-secondary" onclick="closeConfirmModal()">Vazgeç</button>
+          <button class="btn-primary" style="background: #e74c3c;" onclick="confirmDeleteArchive()">Evet, Sil</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TOP NAVBAR ═══ -->
+    <header class="top-navbar">
+      <button class="btn-hamburger" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-title">Vardiya Görüntüleyici</div>
+      <button class="btn-login-nav" id="loginToggle" onclick="openLoginModal()">
+        <span class="login-dot" id="loginDot"></span>
+        <span id="loginLabel">Oturum Aç</span>
+      </button>
+    </header>
+
+    <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar-menu" id="sidebarMenu">
+      <div class="sidebar-header">
+        <h3>Menü</h3>
+        <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
+      </div>
+      <div class="calendar-status" id="dataStatus">Henüz veri yüklenmedi</div>
+      <div class="sidebar-actions">
+        <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
+          <span class="icon">📊</span> İstatistikler
+        </button>
+        <button class="btn-sidebar" id="btnArchive" onclick="openArchiveModal(); toggleSidebar();">
+          <span class="icon">🗄️</span> Arşiv Listesi
+        </button>
+        <button class="btn-sidebar" id="btnSaveArchive" onclick="saveCurrentToArchive(); toggleSidebar();">
+          <span class="icon">💾</span> Günceli Kaydet
+        </button>
+        <button class="btn-sidebar" id="refreshBtn" style="margin-top: 15px; background: rgba(52, 152, 219, 0.2);">
+          <span class="refresh-icon" id="refreshIcon">↻</span> Güncelle
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="main-layout mobile-layout">
+
+      <!-- ═══ HORIZONTAL CALENDAR ═══ -->
+      <div class="calendar-container">
+        <div class="horizontal-calendar-wrapper">
+          <div class="horizontal-calendar" id="horizontalCalendar">
+            <!-- Days will be injected here -->
+          </div>
+          <button class="btn-expand-calendar" onclick="toggleFullCalendar()" title="Tüm Ayı Gör">▼</button>
+        </div>
+        
+        <!-- Full Month Calendar (Hidden by default) -->
+        <div class="full-calendar-wrapper" id="fullCalendarWrapper" style="display: none;">
+          <div class="calendar-header" id="calendarHeader">Temmuz 2026</div>
+          <div class="calendar-grid" id="dateGrid"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Shifts + Results -->
+      <main class="content-panel">
+
+        <!-- Shift Buttons -->
+        <div class="shift-groups">
+          <div class="shift-bar">
+            <button class="shift-chip shift-all selected" data-shift="all"><span class="chip-dot sa"></span>Tümü <span class="chip-count" id="count-all"></span></button>
+            <button class="shift-chip" data-shift="1"><span class="chip-dot s1"></span>1 <small>00-08</small> <span class="chip-count" id="count-1"></span></button>
+            <button class="shift-chip" data-shift="2"><span class="chip-dot s2"></span>2 <small>08-16</small> <span class="chip-count" id="count-2"></span></button>
+            <button class="shift-chip" data-shift="3"><span class="chip-dot s3"></span>3 <small>16-00</small> <span class="chip-count" id="count-3"></span></button>
+            <button class="shift-chip" data-shift="4"><span class="chip-dot s4"></span>4 <small>08-18</small> <span class="chip-count" id="count-4"></span></button>
+            
+            <button class="btn-toggle-leaves" id="leaveToggleBtn">Diğerleri <span class="arrow">▼</span></button>
+          </div>
+          
+          <div class="shift-bar leave-bar" id="leaveBar" style="display: none;">
+            <button class="shift-chip sl-chip" data-shift="of"><span class="chip-dot sof"></span>OF <small>H.Tatili</small> <span class="chip-count" id="count-of"></span></button>
+            <button class="shift-chip sl-chip" data-shift="üi"><span class="chip-dot sui"></span>Üİ <small>Ücretsiz</small> <span class="chip-count" id="count-üi"></span></button>
+            <button class="shift-chip sl-chip" data-shift="mg"><span class="chip-dot smg"></span>MG <small>Gelmeme</small> <span class="chip-count" id="count-mg"></span></button>
+            <button class="shift-chip sl-chip" data-shift="dr"><span class="chip-dot sdr"></span>DR <small>Rapor</small> <span class="chip-count" id="count-dr"></span></button>
+            <button class="shift-chip sl-chip" data-shift="yi"><span class="chip-dot syi"></span>Yİ <small>Yıllık İz.</small> <span class="chip-count" id="count-yi"></span></button>
+            <button class="shift-chip sl-chip" data-shift="ei"><span class="chip-dot sei"></span>Eİ <small>Evlenme</small> <span class="chip-count" id="count-ei"></span></button>
+            <button class="shift-chip sl-chip" data-shift="öi"><span class="chip-dot soi"></span>Öİ <small>Ölüm</small> <span class="chip-count" id="count-öi"></span></button>
+            <button class="shift-chip sl-chip" data-shift="di"><span class="chip-dot sdi"></span>Dİ <small>Doğum</small> <span class="chip-count" id="count-di"></span></button>
+            <button class="shift-chip sl-chip" data-shift="gt"><span class="chip-dot sgt"></span>GT <small>Görev</small> <span class="chip-count" id="count-gt"></span></button>
+            <button class="shift-chip sl-chip" data-shift="bi"><span class="chip-dot sbi"></span>Bİ <small>Babalık</small> <span class="chip-count" id="count-bi"></span></button>
+            <button class="shift-chip sl-chip" data-shift="hç"><span class="chip-dot shc"></span>HÇ <small>H.Çalışma</small> <span class="chip-count" id="count-hç"></span></button>
+            <button class="shift-chip sl-chip" data-shift="ii"><span class="chip-dot sii"></span>İİ <small>İdari</small> <span class="chip-count" id="count-ii"></span></button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-panel">
+          <div class="results-bar">
+            <div class="results-left">
+              <span class="results-title" id="resultsTitle">Bir tarih seçin</span>
+              <span class="results-count" id="resultsCount"></span>
+            </div>
+          </div>
+          <ul class="person-list" id="personList"></ul>
+          <div class="results-empty" id="resultsEmpty">
+            <div class="empty-icon">📅</div>
+            <p>Takvimden bir gün seçin ve vardiyanızı belirleyin</p>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+<script>
+// ═══ State ═══
+let sessionId = localStorage.getItem('vrd_session') || null;
+let vardiyaData = JSON.parse(localStorage.getItem('vrd_data') || 'null');
+let selectedDay = null;
+let selectedShift = 'all';
+
+const SHIFT_LABELS = {
+  '1': '00:00–08:00', '2': '08:00–16:00',
+  '3': '16:00–00:00', '4': '08:00–18:00',
+  'of': 'Hafta Tatili', 'üi': 'Ücretsiz İzin',
+  'mg': 'Mazeretsiz Gelmeme', 'dr': 'Doktor Raporu',
+  'yi': 'Yıllık İzin', 'ei': 'Evlenme İzni',
+  'öi': 'Ölüm İzni', 'di': 'Doğum İzni',
+  'gt': 'Görev Tamamlama', 'bi': 'Babalık İzni',
+  'hç': 'Hafta Çalışma', 'ii': 'İdari İzin'
+};
+
+const SHIFT_CLASSES = {
+  '1': 's1', '2': 's2', '3': 's3', '4': 's4',
+  'of': 'sof', 'üi': 'sui', 'mg': 'smg', 'dr': 'sdr',
+  'yi': 'syi', 'ei': 'sei', 'öi': 'soi', 'di': 'sdi',
+  'gt': 'sgt', 'bi': 'sbi', 'hç': 'shc', 'ii': 'sii'
+};
+
+// ═══ DOM ═══
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+const loginModal = $('#loginModal');
+const loginForm = $('#loginForm');
+const loginBtn = $('#loginBtn');
+const loginError = $('#loginError');
+const loginToggle = $('#loginToggle');
+const loginLabel = $('#loginLabel');
+const loginDot = $('#loginDot');
+const refreshBtn = $('#refreshBtn');
+const refreshIcon = $('#refreshIcon');
+const dateGrid = $('#dateGrid');
+const calendarHeader = $('#calendarHeader');
+const personList = $('#personList');
+const resultsEmpty = $('#resultsEmpty');
+const resultsCount = $('#resultsCount');
+const resultsTitle = $('#resultsTitle');
+const dataStatus = $('#dataStatus');
+const leaveToggleBtn = $('#leaveToggleBtn');
+const leaveBar = $('#leaveBar');
+
+// Toggle leaves visibility
+leaveToggleBtn.addEventListener('click', () => {
+  const isHidden = leaveBar.style.display === 'none';
+  leaveBar.style.display = isHidden ? 'flex' : 'none';
+  leaveToggleBtn.classList.toggle('open', isHidden);
+});
+
+// ═══ API & Scraping ═══
+function extractCookies(res) {
+}
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideError();
+  loginBtn.classList.add('loading');
+  loginBtn.disabled = true;
+
+  try {
+    // 1. Get the login page to retrieve the CSRF token and initialize cookies
+    const loginPageRes = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/Personel');
+    const loginPageHtml = await loginPageRes.text();
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(loginPageHtml, 'text/html');
+    const tokenInput = doc.querySelector('input[name="__RequestVerificationToken"]');
+    const token = tokenInput ? tokenInput.value : '';
+
+    if (!token) {
+      throw new Error('Güvenlik anahtarı (CSRF) alınamadı. Bağlantınızı kontrol edin.');
+    }
+
+    // 2. Send login request
+    const body = new URLSearchParams();
+    body.append('__RequestVerificationToken', token);
+    body.append('KullaniciAdi', $('#username').value);
+    body.append('Sifre', $('#password').value);
+    body.append('beniHatirla', 'false');
+
+    const res = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/PersonelGiris', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer': 'https://yeniceri.epms.com.tr/Portal/Giris/Personel'
+      },
+      body: body.toString()
+    });
+
+    const htmlText = await res.text();
+
+    // Check if we are still on the login page / failed
+    if (htmlText.includes('PersonelGiris') && htmlText.includes('KullaniciAdi')) {
+      throw new Error('Kullanıcı adı veya şifre hatalı!');
+    }
+
+    // Success
+    sessionId = 'active'; 
+    localStorage.setItem('vrd_session', sessionId);
+    localStorage.setItem('vrd_user', $('#username').value);
+    
+    updateLoginState();
+    closeLoginModal();
+    fetchData();
+  } catch (err) {
+    showError(err.message || 'Giriş yapılamadı. İnternet bağlantınızı kontrol edin.');
+  } finally {
+    loginBtn.classList.remove('loading');
+    loginBtn.disabled = false;
+  }
+});
+
+// ═══ Login Modal ═══
+function openLoginModal() {
+  loginModal.classList.add('open');
+  hideError();
+  loginForm.reset();
+  setTimeout(() => $('#username').focus(), 200);
+}
+
+function closeLoginModal() {
+  loginModal.classList.remove('open');
+}
+
+function hideError() { loginError.textContent = ''; }
+function showError(msg) { loginError.textContent = msg; }
+function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(); }
+
+loginToggle.addEventListener('click', () => {
+  if (sessionId) {
+    sessionId = null;
+    localStorage.removeItem('vrd_session');
+    localStorage.removeItem('vrd_user');
+    updateLoginState();
+  } else {
+    openLoginModal();
+  }
+});
+
+function updateLoginState() {
+  const isOnline = !!sessionId;
+  loginLabel.textContent = isOnline ? 'Çıkış' : 'Oturum Aç';
+  loginDot.classList.toggle('online', isOnline);
+}
+
+// ═══ Fetch Data ═══
+refreshBtn.addEventListener('click', () => {
+  if (!sessionId) {
+    openLoginModal();
+  } else {
+    fetchData();
+  }
+});
+
+async function fetchData() {
+  refreshIcon.classList.add('spinning');
+  refreshBtn.disabled = true;
+
+  try {
+    const res = await fetch('https://yeniceri.epms.com.tr/Portal/Home/Vardiya');
+    const htmlText = await res.text();
+
+    if (htmlText.includes('PersonelGiris') || htmlText.includes('/Portal/Giris')) {
+      throw new Error('oturum'); // Session expired
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+
+    // Parse Caption
+    let captionText = '';
+    const captions = doc.querySelectorAll('div.caption');
+    captions.forEach(c => {
+      if (c.textContent.includes('Planlanan Vardiya')) {
+        captionText = c.textContent.trim();
+      }
+    });
+
+    // Parse Headers
+    const headers = [];
+    const headerCells = doc.querySelectorAll('table.table thead tr th, table.table tr:first-child th');
+    headerCells.forEach((th, i) => {
+      if (i === 0) return;
+      const text = th.textContent.trim();
+      const parts = text.split(/\s+/);
+      headers.push({
+        day: parseInt(parts[0], 10),
+        dayName: parts[1] || ''
+      });
+    });
+
+    // Parse Data Rows
+    const personnel = [];
+    const rows = doc.querySelectorAll('table.table tr[id]');
+    rows.forEach(row => {
+      const name = row.querySelector('td:first-child')?.textContent.trim();
+      const shifts = [];
+      const cells = row.querySelectorAll('td');
+      
+      cells.forEach((td, i) => {
+        if (i === 0) return;
+        shifts.push(td.textContent.trim().toLowerCase());
+      });
+
+      if (name) {
+        personnel.push({ name, shifts });
+      }
+    });
+
+    const parsedData = {
+      caption: captionText,
+      headers,
+      personnel,
+      totalPersonnel: personnel.length
+    };
+
+    vardiyaData = parsedData;
+    localStorage.setItem('vrd_data', JSON.stringify(parsedData));
+    localStorage.setItem('vrd_lastUpdate', new Date().toISOString());
+    
+    renderCalendar();
+    updateResults();
+    updateDataStatus();
+  } catch (err) {
+    if (err.message === 'oturum') {
+      sessionId = null;
+      localStorage.removeItem('vrd_session');
+      updateLoginState();
+      openLoginModal();
+    } else {
+      alert('Veri çekilemedi: ' + err.message);
+    }
+  } finally {
+    refreshIcon.classList.remove('spinning');
+    refreshBtn.disabled = false;
+  }
+}
+
+// ═══ Calendar ═══
+function renderCalendar() {
+  if (!vardiyaData || !vardiyaData.headers) return;
+
+  const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  
+  // Try parsing the period from headers if possible (e.g. 01.07)
+  const firstHeader = vardiyaData.headers[0];
+  let firstHeaderStr = '';
+  if (typeof firstHeader === 'string') {
+    firstHeaderStr = firstHeader;
+  } else if (firstHeader && typeof firstHeader === 'object') {
+    if (vardiyaData.caption) {
+      const caption = vardiyaData.caption;
+      for (let i = 0; i < monthNames.length; i++) {
+        if (caption.includes(monthNames[i])) {
+          currentMonth = i;
+          break;
+        }
+      }
+      const yearMatch = caption.match(/20\d{2}/);
+      if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+    }
+  }
+
+  if (firstHeaderStr) {
+    const monthMatch = firstHeaderStr.match(/\.(\d{2})/);
+    if (monthMatch) currentMonth = parseInt(monthMatch[1], 10) - 1;
+  }
+
+  const titleMatch = document.querySelector('title')?.innerText || '';
+  const yearMatch = titleMatch.match(/20\d{2}/);
+  if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+
+  calendarHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = vardiyaData.headers.length;
+  const today = new Date().getDate();
+  const isCurrentMonth = new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
+
+  const dayNames = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
+  let html = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  for (let i = 0; i < startOffset; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = isCurrentMonth && d === today;
+    const cls = `cal-cell${isToday ? ' today' : ''}`;
+    html += `<button class="${cls}" data-day="${d}">${d}</button>`;
+  }
+
+  dateGrid.innerHTML = html;
+
+  dateGrid.querySelectorAll('.cal-cell:not(.empty)').forEach(btn => {
+    btn.addEventListener('click', () => selectDay(parseInt(btn.dataset.day, 10)));
+  });
+
+  // Auto-select today if no day selected
+  if (!selectedDay && isCurrentMonth) {
+    selectDay(today);
+  } else if (selectedDay) {
+    selectDay(selectedDay);
+  } else if (!selectedDay && !isCurrentMonth) {
+    selectDay(1);
+  }
+  
+  // Also render horizontal calendar
+  renderHorizontalCalendar();
+}
+
+// ═══ UI Toggles ═══
+function toggleSidebar() {
+  $('#sidebarMenu').classList.toggle('open');
+  $('#sidebarOverlay').classList.toggle('open');
+}
+
+function toggleFullCalendar() {
+  const fullCal = $('#fullCalendarWrapper');
+  const btn = $('.btn-expand-calendar');
+  const isHidden = fullCal.style.display === 'none';
+  fullCal.style.display = isHidden ? 'block' : 'none';
+  btn.classList.toggle('open', isHidden);
+}
+
+// ═══ Horizontal Calendar ═══
+function renderHorizontalCalendar() {
+  if (!vardiyaData || !vardiyaData.headers) return;
+  const hContainer = $('#horizontalCalendar');
+  const daysInMonth = vardiyaData.headers.length;
+  const dayNames = ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'];
+  
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  // We can try to parse from caption like renderCalendar does, but let's just assume current for demo
+  // Or better, extract it from calendarHeader text if set
+  const headerText = $('#calendarHeader').textContent;
+  const yearMatch = headerText.match(/20\d{2}/);
+  if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+  
+  hContainer.innerHTML = '';
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    // We don't necessarily know the exact month index if it's from EPMS caption, 
+    // but we know the 'dayName' from vardiyaData.headers.
+    const headerData = vardiyaData.headers[d - 1];
+    const dName = headerData ? headerData.dayName : '';
+    
+    const isToday = (d === new Date().getDate() && new Date().getFullYear() === currentYear);
+    
+    const btn = document.createElement('div');
+    btn.className = 'h-day';
+    if (isToday) btn.classList.add('today');
+    if (d === selectedDay) btn.classList.add('selected');
+    
+    btn.innerHTML = `
+      <div class="h-day-name">${dName}</div>
+      <div class="h-day-num">${d}</div>
+    `;
+    
+    btn.onclick = () => selectDay(d);
+    hContainer.appendChild(btn);
+  }
+  
+  // Auto-scroll to selected day
+  setTimeout(() => {
+    const selectedEl = hContainer.querySelector('.h-day.selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, 100);
+}
+
+// ═══ Day Selection ═══
+function selectDay(day) {
+  selectedDay = day;
+  // Update Full Grid
+  dateGrid.querySelectorAll('.cal-cell:not(.empty)').forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.dataset.day, 10) === day);
+  });
+  // Update Horizontal
+  $('#horizontalCalendar').querySelectorAll('.h-day').forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.querySelector('.h-day-num').textContent, 10) === day);
+  });
+  updateResults();
+  
+  // Auto-close full calendar on mobile when day is selected
+  const fullCal = $('#fullCalendarWrapper');
+  if (fullCal.style.display === 'block') {
+    toggleFullCalendar();
+  }
+}
+
+// ═══ Shift Selection ═══
+$$('.shift-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedShift = btn.dataset.shift;
+    $$('.shift-chip').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    updateResults();
+  });
+});
+
+// ═══ Results ═══
+function updateResults() {
+  if (!vardiyaData || selectedDay === null) {
+    personList.innerHTML = '';
+    resultsEmpty.style.display = 'flex';
+    resultsCount.textContent = '';
+    resultsTitle.textContent = 'Bir tarih seçin';
+    return;
+  }
+
+  const dayIndex = selectedDay - 1;
+
+  let filtered = vardiyaData.personnel.filter(p => {
+    if (dayIndex >= p.shifts.length) return false;
+    const sv = p.shifts[dayIndex];
+    if (selectedShift === 'all') return sv !== '' && sv !== undefined && sv !== null;
+    return sv === selectedShift;
+  });
+
+  filtered.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+  const shiftLabel = selectedShift === 'all' ? 'Tüm Vardiyalar ve İzinler' : `${SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase()}`;
+  resultsTitle.textContent = `${selectedDay}. gün — ${shiftLabel}`;
+  resultsCount.textContent = `${filtered.length} kişi`;
+
+  if (filtered.length === 0) {
+    personList.innerHTML = '';
+    resultsEmpty.style.display = 'flex';
+    resultsEmpty.querySelector('p').textContent = 'Bu gün ve vardiya için kimse bulunamadı.';
+    updateChipCounts(dayIndex);
+  } else {
+    resultsEmpty.style.display = 'none';
+    personList.innerHTML = filtered.map((p, i) => {
+      const shift = p.shifts[dayIndex];
+      const initials = p.name.split(' ').slice(0, 2).map(w => w[0]).join('');
+      const shiftClass = SHIFT_CLASSES[shift] || 's-default';
+      
+      const prevShift = dayIndex > 0 ? p.shifts[dayIndex - 1] : '';
+      const nextShift = dayIndex < p.shifts.length - 1 ? p.shifts[dayIndex + 1] : '';
+      
+      const prevClass = SHIFT_CLASSES[prevShift] || '';
+      const nextClass = SHIFT_CLASSES[nextShift] || '';
+
+      return `
+        <li class="person-card ${shiftClass}" style="animation-delay:${i * 25}ms">
+          <div class="person-card-header">
+            <div class="person-avatar">${initials}</div>
+            <span class="person-name" title="${capitalize(p.name)}">${capitalize(p.name)}</span>
+            <div class="timeline-container">
+              <div class="timeline-day prev" title="${selectedDay - 1}. gün">
+                <span class="t-label">Dün</span>
+                <span class="t-val ${prevClass}">${getShortLabel(prevShift)}</span>
+              </div>
+              <div class="timeline-day curr" title="${selectedDay}. gün">
+                <span class="t-label">Bugün</span>
+                <span class="t-val ${shiftClass}">${getShortLabel(shift)}</span>
+              </div>
+              <div class="timeline-day next" title="${selectedDay + 1}. gün">
+                <span class="t-label">Yarın</span>
+                <span class="t-val ${nextClass}">${getShortLabel(nextShift)}</span>
+              </div>
+            </div>
+            <button class="expand-btn" onclick="this.closest('.person-card').classList.toggle('expanded')" title="Tüm Ayı Gör">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+          </div>
+          <div class="full-month-container">
+            ${p.shifts.map((s, idx) => {
+              const sClass = SHIFT_CLASSES[s] || 's-default';
+              const dayObj = vardiyaData.headers[idx] || { day: idx + 1, dayName: '' };
+              return `
+                <div class="month-day-chip ${sClass}" title="${dayObj.day} ${dayObj.dayName}">
+                  <span class="m-day">${dayObj.day}</span>
+                  <span class="m-val">${getShortLabel(s)}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </li>`;
+    }).join('');
+    updateChipCounts(dayIndex);
+  }
+}
+
+// ═══ Helpers ═══
+const SHORT_LABELS = {
+  '1': '1', '2': '2', '3': '3', '4': '4',
+  'of': 'OF', 'üi': 'Üİ', 'mg': 'MG', 'dr': 'DR',
+  'yi': 'Yİ', 'ei': 'Eİ', 'öi': 'Öİ', 'di': 'Dİ',
+  'gt': 'GT', 'bi': 'Bİ', 'hç': 'HÇ', 'ii': 'İİ'
+};
+
+function getShortLabel(shift) {
+  if (!shift) return '—';
+  return SHORT_LABELS[shift] || shift.toUpperCase();
+}
+
+function updateChipCounts(dayIndex) {
+  if (!vardiyaData) return;
+  const counts = {};
+  let total = 0;
+  vardiyaData.personnel.forEach(p => {
+    if (dayIndex >= p.shifts.length) return;
+    const sv = p.shifts[dayIndex];
+    if (sv && sv !== '') {
+      counts[sv] = (counts[sv] || 0) + 1;
+      total++;
+    }
+  });
+  
+  // Update all chip count badges
+  const allKeys = ['1','2','3','4','of','üi','mg','dr','yi','ei','öi','di','gt','bi','hç','ii'];
+  allKeys.forEach(key => {
+    const el = document.getElementById(`count-${key}`);
+    if (el) {
+      const c = counts[key] || 0;
+      el.textContent = c > 0 ? c : '';
+    }
+  });
+  const allEl = document.getElementById('count-all');
+  if (allEl) allEl.textContent = total > 0 ? total : '';
+}
+
+function capitalize(str) {
+  return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function showError(msg) {
+  loginError.textContent = '⚠️ ' + msg;
+  loginError.style.display = 'block';
+}
+function hideError() {
+  loginError.style.display = 'none';
+}
+
+function updateDataStatus() {
+  const ts = localStorage.getItem('vrd_lastUpdate');
+  if (ts) {
+    const d = new Date(ts);
+    dataStatus.textContent = `Son güncelleme: ${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}`;
+  }
+  if (vardiyaData) {
+    dataStatus.textContent += ` · ${vardiyaData.totalPersonnel} personel`;
+  }
+}
+
+// ═══ Init ═══
+(function init() {
+  updateLoginState();
+
+  if (vardiyaData) {
+    renderCalendar();
+    updateResults();
+  }
+  updateDataStatus();
+})();
+// ═══ ARCHIVE LOGIC ═══
+let archives = JSON.parse(localStorage.getItem('vrd_archives') || '[]');
+let deleteTargetId = null;
+
+function saveCurrentToArchive() {
+  if (!vardiyaData) return alert('Kaydedilecek veri yok. Lütfen önce Güncelle yapın.');
+  const name = prompt('Bu kayıt için bir isim girin (Örn: Temmuz Güncel):');
+  if (!name) return;
+  const newArchive = {
+    id: Date.now(),
+    name: name,
+    date: new Date().toISOString(),
+    data: vardiyaData
+  };
+  archives.push(newArchive);
+  localStorage.setItem('vrd_archives', JSON.stringify(archives));
+  alert('Başarıyla kaydedildi!');
+}
+
+function openArchiveModal() {
+  const listEl = $('#archiveList');
+  listEl.innerHTML = '';
+  if (archives.length === 0) {
+    listEl.innerHTML = '<p style="text-align:center;color:#8ba3cb;padding:20px;">Henüz kaydedilmiş bir arşiv yok.</p>';
+  } else {
+    archives.slice().reverse().forEach(arch => {
+      const d = new Date(arch.date);
+      const div = document.createElement('div');
+      div.className = 'archive-item';
+      div.innerHTML = `
+        <div class="archive-info">
+          <div class="archive-name">${arch.name}</div>
+          <div class="archive-date">${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR')}</div>
+        </div>
+        <div class="archive-actions">
+          <button class="btn-icon" title="Yükle" onclick="loadArchive(${arch.id})">📂</button>
+          <button class="btn-icon" title="Sil" style="color:#e74c3c" onclick="promptDeleteArchive(${arch.id})">🗑️</button>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+  $('#archiveModal').classList.add('open');
+}
+
+function closeArchiveModal() {
+  $('#archiveModal').classList.remove('open');
+}
+
+function loadArchive(id) {
+  const arch = archives.find(a => a.id === id);
+  if (!arch) return;
+  vardiyaData = arch.data;
+  selectedDay = null;
+  renderCalendar();
+  updateResults();
+  updateDataStatus();
+  closeArchiveModal();
+  alert(`"${arch.name}" arşivi yüklendi. Güncel verilere dönmek için 'Güncelle' butonuna basabilirsiniz.`);
+}
+
+function promptDeleteArchive(id) {
+  deleteTargetId = id;
+  $('#deleteConfirmModal').classList.add('open');
+}
+function closeConfirmModal() {
+  deleteTargetId = null;
+  $('#deleteConfirmModal').classList.remove('open');
+}
+function confirmDeleteArchive() {
+  if (!deleteTargetId) return;
+  archives = archives.filter(a => a.id !== deleteTargetId);
+  localStorage.setItem('vrd_archives', JSON.stringify(archives));
+  closeConfirmModal();
+  openArchiveModal(); // refresh list
+}
+
+// ═══ STATS LOGIC ═══
+function openStatsModal() {
+  if (!vardiyaData) return alert('İstatistikleri görmek için önce veri yüklemelisiniz.');
+  
+  const select = $('#personStatsSelect');
+  select.innerHTML = '<option value="">Kişi Seçin...</option>';
+  
+  const sortedPersonnel = [...vardiyaData.personnel].sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  sortedPersonnel.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = capitalize(p.name);
+    select.appendChild(opt);
+  });
+  
+  $('#btnOverallStats').classList.add('active');
+  select.value = '';
+  showOverallStats();
+  $('#statsModal').classList.add('open');
+}
+
+function closeStatsModal() {
+  $('#statsModal').classList.remove('open');
+}
+
+function renderStatsGrid(counts) {
+  const content = $('#statsContent');
+  content.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'stats-grid';
+  
+  const keys = ['1','2','3','4','of','üi','mg','dr','yi','ei','öi','di','gt','bi','hç','ii'];
+  keys.forEach(k => {
+    if (counts[k]) {
+      const card = document.createElement('div');
+      card.className = 'stat-card';
+      card.innerHTML = `
+        <div class="stat-value" style="color: var(--c-${k})">${counts[k]}</div>
+        <div class="stat-label">${SHIFT_LABELS[k] || k.toUpperCase()}</div>
+      `;
+      grid.appendChild(card);
+    }
+  });
+  content.appendChild(grid);
+}
+
+function showOverallStats() {
+  $('#btnOverallStats').classList.add('active');
+  $('#personStatsSelect').value = '';
+  
+  const counts = {};
+  vardiyaData.personnel.forEach(p => {
+    p.shifts.forEach(s => {
+      if (s && s !== '') counts[s] = (counts[s] || 0) + 1;
+    });
+  });
+  renderStatsGrid(counts);
+}
+
+function showPersonStats(name) {
+  if (!name) return showOverallStats();
+  $('#btnOverallStats').classList.remove('active');
+  
+  const person = vardiyaData.personnel.find(p => p.name === name);
+  if (!person) return;
+  
+  const counts = {};
+  person.shifts.forEach(s => {
+    if (s && s !== '') counts[s] = (counts[s] || 0) + 1;
+  });
+  renderStatsGrid(counts);
+}
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('ServiceWorker registration successful');
+        }, err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+</script>
+</body>
+</html>
