@@ -572,12 +572,39 @@ function renderHorizontalCalendar() {
   setTimeout(() => {
     const selectedEl = hContainer.querySelector('.h-day.selected');
     if (selectedEl) scrollToDay(selectedEl);
+    if (typeof updateRotaryStyles === 'function') updateRotaryStyles();
   }, 100);
 }
+
+const updateRotaryStyles = () => {
+  const containerCenter = hContainer.scrollLeft + (hContainer.clientWidth / 2);
+  hContainer.querySelectorAll('.h-day').forEach(item => {
+    const itemCenter = item.offsetLeft + (item.clientWidth / 2);
+    const diff = itemCenter - containerCenter;
+    const maxDist = hContainer.clientWidth / 1.5;
+    let ratio = diff / maxDist;
+    if (ratio > 1) ratio = 1;
+    if (ratio < -1) ratio = -1;
+    const absRatio = Math.abs(ratio);
+
+    const scale = 1 - (absRatio * 0.2);
+    const opacity = 1 - (absRatio * 0.5);
+    const rotateX = ratio * 20;
+
+    item.style.transform = `perspective(500px) rotateX(${rotateX}deg) scale(${scale})`;
+    if (!item.classList.contains('selected')) {
+      item.style.opacity = opacity;
+    } else {
+      item.style.opacity = 1;
+      item.style.transform = `perspective(500px) rotateX(${rotateX}deg) scale(${scale * 1.1})`;
+    }
+  });
+};
 
 // Rotary Scroll Listener
 let scrollTimeout;
 hContainer.addEventListener('scroll', () => {
+  updateRotaryStyles();
   clearTimeout(scrollTimeout);
   scrollTimeout = setTimeout(() => {
     const containerCenter = hContainer.scrollLeft + (hContainer.clientWidth / 2);
