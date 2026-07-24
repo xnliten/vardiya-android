@@ -504,7 +504,7 @@ function renderCalendar() {
   }
   
   // Also render horizontal calendar
-  renderHorizontalCalendar();
+  renderHorizontalCalendar(currentMonth, currentYear);
 }
 
 // ═══ UI Toggles ═══
@@ -522,16 +522,18 @@ function toggleFullCalendar() {
 }
 
 // ═══ Horizontal Calendar ═══
-function renderHorizontalCalendar() {
+function renderHorizontalCalendar(monthOverride, yearOverride) {
   if (!vardiyaData || !vardiyaData.headers) return;
   const daysInMonth = vardiyaData.headers.length;
   const dayNames = ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'];
   
-  let currentMonth = new Date().getMonth();
-  let currentYear = new Date().getFullYear();
-  const headerText = $('#calendarHeader').textContent;
-  const yearMatch = headerText.match(/20\d{2}/);
-  if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+  let currentMonth = monthOverride !== undefined ? monthOverride : new Date().getMonth();
+  let currentYear = yearOverride !== undefined ? yearOverride : new Date().getFullYear();
+  if (monthOverride === undefined || yearOverride === undefined) {
+    const headerText = $('#calendarHeader').textContent;
+    const yearMatch = headerText.match(/20\d{2}/);
+    if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+  }
   
   hContainer.innerHTML = '';
   // Spacer for start
