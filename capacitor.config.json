@@ -1,0 +1,10 @@
+{
+  "appId": "com.epms.vardiya",
+  "appName": "vardiya-app",
+  "webDir": "public",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

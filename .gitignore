@@ -1,11 +1,11 @@
 *
+!.gitignore
 !public/
-!public/*
+!public/**
 !package.json
 !package-lock.json
 !server.js
 !.github/
-!.github/*
-!.github/workflows/
-!.github/workflows/*
-!.gitignore
+!.github/**
+!capacitor.config.json
+!android/

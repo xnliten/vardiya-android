@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">vardiya-app</string>
+    <string name="title_activity_main">vardiya-app</string>
+    <string name="package_name">com.epms.vardiya</string>
+    <string name="custom_url_scheme">com.epms.vardiya</string>
+</resources>
