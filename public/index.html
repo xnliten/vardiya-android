@@ -708,6 +708,21 @@ function updateResults() {
 
   filtered.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
+  const headerText = $('#calendarHeader').textContent || '';
+  const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  let curMonthName = "";
+  monthNames.forEach(m => {
+    if (headerText.includes(m)) curMonthName = m;
+  });
+
+  const prevDayNum = selectedDay - 1;
+  const currDayNum = selectedDay;
+  const nextDayNum = selectedDay + 1;
+
+  const prevLabelText = prevDayNum > 0 ? `${prevDayNum} ${curMonthName}`.trim() : `${prevDayNum}. gün`;
+  const currLabelText = `${currDayNum} ${curMonthName}`.trim();
+  const nextLabelText = nextDayNum <= vardiyaData.headers.length ? `${nextDayNum} ${curMonthName}`.trim() : `${nextDayNum}. gün`;
+
   const shiftLabel = selectedShift === 'all' ? 'Tüm Vardiyalar ve İzinler' : `${SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase()}`;
   resultsTitle.textContent = `${selectedDay}. gün — ${shiftLabel}`;
   resultsCount.textContent = `${filtered.length} kişi`;
@@ -741,16 +756,16 @@ function updateResults() {
               </button>
             </div>
             <div class="timeline-container">
-              <div class="timeline-day prev" title="${selectedDay - 1}. gün">
-                <span class="t-label">Önceki</span>
+              <div class="timeline-day prev" title="${prevDayNum > 0 ? prevDayNum : ''}. gün">
+                <span class="t-label">${prevLabelText}</span>
                 <span class="t-val ${prevClass}">${getShortLabel(prevShift)}</span>
               </div>
-              <div class="timeline-day curr" title="${selectedDay}. gün">
-                <span class="t-label">Seçili</span>
+              <div class="timeline-day curr" title="${currDayNum}. gün">
+                <span class="t-label">${currLabelText}</span>
                 <span class="t-val ${shiftClass}">${getShortLabel(shift)}</span>
               </div>
-              <div class="timeline-day next" title="${selectedDay + 1}. gün">
-                <span class="t-label">Sonraki</span>
+              <div class="timeline-day next" title="${nextDayNum}. gün">
+                <span class="t-label">${nextLabelText}</span>
                 <span class="t-val ${nextClass}">${getShortLabel(nextShift)}</span>
               </div>
             </div>
