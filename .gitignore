@@ -9,3 +9,4 @@
 !.github/**
 !capacitor.config.json
 !android/
+!android/**
