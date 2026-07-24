@@ -150,16 +150,16 @@
             <button class="shift-chip" data-shift="2"><span class="chip-dot s2"></span>2 <small>08-16</small> <span class="chip-count" id="count-2"></span></button>
             <button class="shift-chip" data-shift="3"><span class="chip-dot s3"></span>3 <small>16-00</small> <span class="chip-count" id="count-3"></span></button>
             <button class="shift-chip" data-shift="4"><span class="chip-dot s4"></span>4 <small>08-18</small> <span class="chip-count" id="count-4"></span></button>
+            <button class="shift-chip sl-chip" data-shift="of"><span class="chip-dot sof"></span>OF <small>H.Tatili</small> <span class="chip-count" id="count-of"></span></button>
+            <button class="shift-chip sl-chip" data-shift="yi"><span class="chip-dot syi"></span>Yİ <small>Yıllık İz.</small> <span class="chip-count" id="count-yi"></span></button>
             
             <button class="btn-toggle-leaves" id="leaveToggleBtn">Diğerleri <span class="arrow">▼</span></button>
           </div>
           
           <div class="shift-bar leave-bar" id="leaveBar" style="display: none;">
-            <button class="shift-chip sl-chip" data-shift="of"><span class="chip-dot sof"></span>OF <small>H.Tatili</small> <span class="chip-count" id="count-of"></span></button>
             <button class="shift-chip sl-chip" data-shift="üi"><span class="chip-dot sui"></span>Üİ <small>Ücretsiz</small> <span class="chip-count" id="count-üi"></span></button>
             <button class="shift-chip sl-chip" data-shift="mg"><span class="chip-dot smg"></span>MG <small>Gelmeme</small> <span class="chip-count" id="count-mg"></span></button>
             <button class="shift-chip sl-chip" data-shift="dr"><span class="chip-dot sdr"></span>DR <small>Rapor</small> <span class="chip-count" id="count-dr"></span></button>
-            <button class="shift-chip sl-chip" data-shift="yi"><span class="chip-dot syi"></span>Yİ <small>Yıllık İz.</small> <span class="chip-count" id="count-yi"></span></button>
             <button class="shift-chip sl-chip" data-shift="ei"><span class="chip-dot sei"></span>Eİ <small>Evlenme</small> <span class="chip-count" id="count-ei"></span></button>
             <button class="shift-chip sl-chip" data-shift="öi"><span class="chip-dot soi"></span>Öİ <small>Ölüm</small> <span class="chip-count" id="count-öi"></span></button>
             <button class="shift-chip sl-chip" data-shift="di"><span class="chip-dot sdi"></span>Dİ <small>Doğum</small> <span class="chip-count" id="count-di"></span></button>
@@ -825,6 +825,25 @@ function updateChipCounts(dayIndex) {
   });
   const allEl = document.getElementById('count-all');
   if (allEl) allEl.textContent = total > 0 ? total : '';
+
+  // Sort remaining leave chips in Diğerleri bar by count descending
+  sortLeaveBarChips(counts);
+}
+
+function sortLeaveBarChips(counts) {
+  const leaveBarEl = document.getElementById('leaveBar');
+  if (!leaveBarEl) return;
+  const chips = Array.from(leaveBarEl.querySelectorAll('.shift-chip'));
+  
+  chips.sort((a, b) => {
+    const keyA = a.dataset.shift;
+    const keyB = b.dataset.shift;
+    const countA = counts[keyA] || 0;
+    const countB = counts[keyB] || 0;
+    return countB - countA;
+  });
+
+  chips.forEach(chip => leaveBarEl.appendChild(chip));
 }
 
 function capitalize(str) {
