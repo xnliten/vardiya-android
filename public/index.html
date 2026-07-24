@@ -90,17 +90,10 @@
       </div>
     </div>
 
-    <!-- ═══ TOP NAVBAR ═══ -->
-    <header class="top-navbar">
-      <button class="btn-hamburger" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="nav-title">Vardiya Görüntüleyici</div>
-      <button class="btn-login-nav" id="loginToggle" onclick="openLoginModal()">
-        <span class="login-dot" id="loginDot"></span>
-        <span id="loginLabel">Oturum Aç</span>
-      </button>
-    </header>
+    <!-- ═══ FLOATING HAMBURGER ═══ -->
+    <button class="btn-hamburger floating" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
 
     <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -111,6 +104,9 @@
       </div>
       <div class="calendar-status" id="dataStatus">Henüz veri yüklenmedi</div>
       <div class="sidebar-actions">
+        <button class="btn-sidebar" id="loginToggle" onclick="openLoginModal(); toggleSidebar();">
+          <span class="icon login-dot" id="loginDot"></span> <span id="loginLabel">Oturum Aç</span>
+        </button>
         <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
           <span class="icon">📊</span> İstatistikler
         </button>
@@ -242,6 +238,7 @@ const resultsTitle = $('#resultsTitle');
 const dataStatus = $('#dataStatus');
 const leaveToggleBtn = $('#leaveToggleBtn');
 const leaveBar = $('#leaveBar');
+const hContainer = $('#horizontalCalendar');
 
 // Toggle leaves visibility
 leaveToggleBtn.addEventListener('click', () => {
@@ -531,26 +528,24 @@ function toggleFullCalendar() {
 // ═══ Horizontal Calendar ═══
 function renderHorizontalCalendar() {
   if (!vardiyaData || !vardiyaData.headers) return;
-  const hContainer = $('#horizontalCalendar');
   const daysInMonth = vardiyaData.headers.length;
   const dayNames = ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'];
   
   let currentMonth = new Date().getMonth();
   let currentYear = new Date().getFullYear();
-  // We can try to parse from caption like renderCalendar does, but let's just assume current for demo
-  // Or better, extract it from calendarHeader text if set
   const headerText = $('#calendarHeader').textContent;
   const yearMatch = headerText.match(/20\d{2}/);
   if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
   
   hContainer.innerHTML = '';
+  // Spacer for start
+  const spacerStart = document.createElement('div');
+  spacerStart.className = 'h-spacer';
+  hContainer.appendChild(spacerStart);
   
   for (let d = 1; d <= daysInMonth; d++) {
-    // We don't necessarily know the exact month index if it's from EPMS caption, 
-    // but we know the 'dayName' from vardiyaData.headers.
     const headerData = vardiyaData.headers[d - 1];
     const dName = headerData ? headerData.dayName : '';
-    
     const isToday = (d === new Date().getDate() && new Date().getFullYear() === currentYear);
     
     const btn = document.createElement('div');
@@ -563,29 +558,69 @@ function renderHorizontalCalendar() {
       <div class="h-day-num">${d}</div>
     `;
     
-    btn.onclick = () => selectDay(d);
+    btn.dataset.day = d;
+    btn.onclick = () => { selectDay(d); scrollToDay(btn); };
     hContainer.appendChild(btn);
   }
   
-  // Auto-scroll to selected day
+  // Spacer for end
+  const spacerEnd = document.createElement('div');
+  spacerEnd.className = 'h-spacer';
+  hContainer.appendChild(spacerEnd);
+  
+  // Auto-scroll to selected day after render
   setTimeout(() => {
     const selectedEl = hContainer.querySelector('.h-day.selected');
-    if (selectedEl) {
-      selectedEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
+    if (selectedEl) scrollToDay(selectedEl);
   }, 100);
 }
 
+// Rotary Scroll Listener
+let scrollTimeout;
+hContainer.addEventListener('scroll', () => {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    const containerCenter = hContainer.scrollLeft + (hContainer.clientWidth / 2);
+    let closestDay = null;
+    let minDistance = Infinity;
+    
+    hContainer.querySelectorAll('.h-day').forEach(dayEl => {
+      const dayCenter = dayEl.offsetLeft + (dayEl.clientWidth / 2);
+      const distance = Math.abs(containerCenter - dayCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestDay = dayEl;
+      }
+    });
+    
+    if (closestDay && parseInt(closestDay.dataset.day, 10) !== selectedDay) {
+      selectDay(parseInt(closestDay.dataset.day, 10), false); // false = don't force scroll back
+    }
+  }, 100); // 100ms debounce
+});
+
+function scrollToDay(dayEl) {
+  const containerCenter = hContainer.clientWidth / 2;
+  const dayCenter = dayEl.offsetLeft + (dayEl.clientWidth / 2);
+  hContainer.scrollTo({
+    left: dayCenter - containerCenter,
+    behavior: 'smooth'
+  });
+}
+
 // ═══ Day Selection ═══
-function selectDay(day) {
+function selectDay(day, autoScroll = true) {
   selectedDay = day;
   // Update Full Grid
   dateGrid.querySelectorAll('.cal-cell:not(.empty)').forEach(btn => {
     btn.classList.toggle('selected', parseInt(btn.dataset.day, 10) === day);
   });
   // Update Horizontal
-  $('#horizontalCalendar').querySelectorAll('.h-day').forEach(btn => {
-    btn.classList.toggle('selected', parseInt(btn.querySelector('.h-day-num').textContent, 10) === day);
+  const hDays = hContainer.querySelectorAll('.h-day');
+  hDays.forEach(btn => {
+    const isSel = parseInt(btn.dataset.day, 10) === day;
+    btn.classList.toggle('selected', isSel);
+    if (isSel && autoScroll) scrollToDay(btn);
   });
   updateResults();
   
@@ -652,8 +687,13 @@ function updateResults() {
       return `
         <li class="person-card ${shiftClass}" style="animation-delay:${i * 25}ms">
           <div class="person-card-header">
-            <div class="person-avatar">${initials}</div>
-            <span class="person-name" title="${capitalize(p.name)}">${capitalize(p.name)}</span>
+            <div class="person-top-row">
+              <div class="person-avatar">${initials}</div>
+              <span class="person-name" title="${capitalize(p.name)}">${capitalize(p.name)}</span>
+              <button class="expand-btn" onclick="this.closest('.person-card').classList.toggle('expanded')" title="Tüm Ayı Gör">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+            </div>
             <div class="timeline-container">
               <div class="timeline-day prev" title="${selectedDay - 1}. gün">
                 <span class="t-label">Dün</span>
@@ -668,9 +708,6 @@ function updateResults() {
                 <span class="t-val ${nextClass}">${getShortLabel(nextShift)}</span>
               </div>
             </div>
-            <button class="expand-btn" onclick="this.closest('.person-card').classList.toggle('expanded')" title="Tüm Ayı Gör">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
           </div>
           <div class="full-month-container">
             ${p.shifts.map((s, idx) => {
