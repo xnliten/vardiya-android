@@ -1,9 +1,10 @@
-const CACHE_NAME = "vardiya-cache-v2";
+const CACHE_NAME = "vardiya-cache-v3";
 const urlsToCache = [
   "/",
   "/index.html",
   "/style.css",
-  "/manifest.json"
+  "/manifest.json",
+  "/icon.svg"
 ];
 
 self.addEventListener("install", event => {
@@ -31,13 +32,20 @@ self.addEventListener('activate', event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
+        // If we got a valid response, clone it and update cache
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        return fetch(event.request);
+        return response;
+      })
+      .catch(() => {
+        // Network failed, try cache
+        return caches.match(event.request);
       })
   );
 });

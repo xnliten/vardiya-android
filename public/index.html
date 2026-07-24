@@ -104,7 +104,7 @@
       </div>
       <div class="calendar-status" id="dataStatus">Henüz veri yüklenmedi</div>
       <div class="sidebar-actions">
-        <button class="btn-sidebar" id="loginToggle" onclick="openLoginModal(); toggleSidebar();">
+        <button class="btn-sidebar" id="loginToggle">
           <span class="icon login-dot" id="loginDot"></span> <span id="loginLabel">Oturum Aç</span>
         </button>
         <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
@@ -248,9 +248,6 @@ leaveToggleBtn.addEventListener('click', () => {
 });
 
 // ═══ API & Scraping ═══
-function extractCookies(res) {
-}
-
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError();
@@ -322,18 +319,16 @@ function closeLoginModal() {
   loginModal.classList.remove('open');
 }
 
-function hideError() { loginError.textContent = ''; }
-function showError(msg) { loginError.textContent = msg; }
-function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(); }
-
 loginToggle.addEventListener('click', () => {
   if (sessionId) {
     sessionId = null;
     localStorage.removeItem('vrd_session');
     localStorage.removeItem('vrd_user');
     updateLoginState();
+    toggleSidebar();
   } else {
     openLoginModal();
+    toggleSidebar();
   }
 });
 
@@ -547,7 +542,7 @@ function renderHorizontalCalendar() {
   for (let d = 1; d <= daysInMonth; d++) {
     const headerData = vardiyaData.headers[d - 1];
     const dName = headerData ? headerData.dayName : '';
-    const isToday = (d === new Date().getDate() && new Date().getFullYear() === currentYear);
+    const isToday = (d === new Date().getDate() && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear);
     
     const btn = document.createElement('div');
     btn.className = 'h-day';
@@ -724,15 +719,15 @@ function updateResults() {
             </div>
             <div class="timeline-container">
               <div class="timeline-day prev" title="${selectedDay - 1}. gün">
-                <span class="t-label">Dün</span>
+                <span class="t-label">Önceki</span>
                 <span class="t-val ${prevClass}">${getShortLabel(prevShift)}</span>
               </div>
               <div class="timeline-day curr" title="${selectedDay}. gün">
-                <span class="t-label">Bugün</span>
+                <span class="t-label">Seçili</span>
                 <span class="t-val ${shiftClass}">${getShortLabel(shift)}</span>
               </div>
               <div class="timeline-day next" title="${selectedDay + 1}. gün">
-                <span class="t-label">Yarın</span>
+                <span class="t-label">Sonraki</span>
                 <span class="t-val ${nextClass}">${getShortLabel(nextShift)}</span>
               </div>
             </div>
@@ -803,6 +798,7 @@ function showError(msg) {
   loginError.style.display = 'block';
 }
 function hideError() {
+  loginError.textContent = '';
   loginError.style.display = 'none';
 }
 
@@ -941,7 +937,7 @@ function renderStatsGrid(counts) {
       const card = document.createElement('div');
       card.className = 'stat-card';
       card.innerHTML = `
-        <div class="stat-value" style="color: var(--c-${k})">${counts[k]}</div>
+        <div class="stat-value" style="color: var(--s${k})">${counts[k]}</div>
         <div class="stat-label">${SHIFT_LABELS[k] || k.toUpperCase()}</div>
       `;
       grid.appendChild(card);
@@ -977,15 +973,15 @@ function showPersonStats(name) {
   renderStatsGrid(counts);
 }
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(registration => {
-          console.log('ServiceWorker registration successful');
-        }, err => {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      });
-    }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log('ServiceWorker registration successful');
+    }, err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
