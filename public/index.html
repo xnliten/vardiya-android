@@ -90,11 +90,6 @@
       </div>
     </div>
 
-    <!-- ═══ FLOATING HAMBURGER ═══ -->
-    <button class="btn-hamburger floating" onclick="toggleSidebar()">
-      <span></span><span></span><span></span>
-    </button>
-
     <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar-menu" id="sidebarMenu">
@@ -123,11 +118,14 @@
     </aside>
 
     <!-- ═══ MAIN CONTENT ═══ -->
-    <div class="main-layout mobile-layout">
+    <div class="main-layout">
 
       <!-- ═══ HORIZONTAL CALENDAR ═══ -->
       <div class="calendar-container">
         <div class="horizontal-calendar-wrapper">
+          <button class="btn-hamburger" onclick="toggleSidebar()" title="Menü">
+            <span></span><span></span><span></span>
+          </button>
           <div class="horizontal-calendar" id="horizontalCalendar">
             <!-- Days will be injected here -->
           </div>
