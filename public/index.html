@@ -247,54 +247,69 @@ leaveToggleBtn.addEventListener('click', () => {
   leaveToggleBtn.classList.toggle('open', isHidden);
 });
 
-// ═══ API & Scraping ═══
+const isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError();
   loginBtn.classList.add('loading');
   loginBtn.disabled = true;
 
+  const username = $('#username').value;
+  const password = $('#password').value;
+
   try {
-    // 1. Get the login page to retrieve the CSRF token and initialize cookies
-    const loginPageRes = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/Personel');
-    const loginPageHtml = await loginPageRes.text();
-    
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(loginPageHtml, 'text/html');
-    const tokenInput = doc.querySelector('input[name="__RequestVerificationToken"]');
-    const token = tokenInput ? tokenInput.value : '';
+    if (!isNative) {
+      // WEB MODE: Use Express Proxy API
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Giriş yapılamadı.');
+      }
+      sessionId = data.sessionId;
+    } else {
+      // NATIVE APK MODE: Direct EPMS fetch
+      const loginPageRes = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/Personel');
+      const loginPageHtml = await loginPageRes.text();
+      
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(loginPageHtml, 'text/html');
+      const tokenInput = doc.querySelector('input[name="__RequestVerificationToken"]');
+      const token = tokenInput ? tokenInput.value : '';
 
-    if (!token) {
-      throw new Error('Güvenlik anahtarı (CSRF) alınamadı. Bağlantınızı kontrol edin.');
+      if (!token) {
+        throw new Error('Güvenlik anahtarı (CSRF) alınamadı. Bağlantınızı kontrol edin.');
+      }
+
+      const body = new URLSearchParams();
+      body.append('__RequestVerificationToken', token);
+      body.append('KullaniciAdi', username);
+      body.append('Sifre', password);
+      body.append('beniHatirla', 'false');
+
+      const res = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/PersonelGiris', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Referer': 'https://yeniceri.epms.com.tr/Portal/Giris/Personel'
+        },
+        body: body.toString()
+      });
+
+      const htmlText = await res.text();
+      if (htmlText.includes('PersonelGiris') && htmlText.includes('KullaniciAdi')) {
+        throw new Error('Kullanıcı adı veya şifre hatalı!');
+      }
+
+      sessionId = 'active'; 
     }
 
-    // 2. Send login request
-    const body = new URLSearchParams();
-    body.append('__RequestVerificationToken', token);
-    body.append('KullaniciAdi', $('#username').value);
-    body.append('Sifre', $('#password').value);
-    body.append('beniHatirla', 'false');
-
-    const res = await fetch('https://yeniceri.epms.com.tr/Portal/Giris/PersonelGiris', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Referer': 'https://yeniceri.epms.com.tr/Portal/Giris/Personel'
-      },
-      body: body.toString()
-    });
-
-    const htmlText = await res.text();
-
-    // Check if we are still on the login page / failed
-    if (htmlText.includes('PersonelGiris') && htmlText.includes('KullaniciAdi')) {
-      throw new Error('Kullanıcı adı veya şifre hatalı!');
-    }
-
-    // Success
-    sessionId = 'active'; 
     localStorage.setItem('vrd_session', sessionId);
-    localStorage.setItem('vrd_user', $('#username').value);
+    localStorage.setItem('vrd_user', username);
     
     updateLoginState();
     closeLoginModal();
@@ -352,67 +367,75 @@ async function fetchData() {
   refreshBtn.disabled = true;
 
   try {
-    const res = await fetch('https://yeniceri.epms.com.tr/Portal/Home/Vardiya');
-    const htmlText = await res.text();
+    if (!isNative) {
+      // WEB MODE: Call Express API endpoint
+      const res = await fetch('/api/vardiya', {
+        headers: { 'x-session-id': sessionId }
+      });
+      if (res.status === 401) {
+        throw new Error('oturum');
+      }
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Veri çekilemedi.');
+      }
+      vardiyaData = data;
+    } else {
+      // NATIVE APK MODE: Direct EPMS scrape
+      const res = await fetch('https://yeniceri.epms.com.tr/Portal/Home/Vardiya');
+      const htmlText = await res.text();
 
-    if (htmlText.includes('PersonelGiris') || htmlText.includes('/Portal/Giris')) {
-      throw new Error('oturum'); // Session expired
+      if (htmlText.includes('PersonelGiris') || htmlText.includes('/Portal/Giris')) {
+        throw new Error('oturum');
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+
+      let captionText = '';
+      const captions = doc.querySelectorAll('div.caption');
+      captions.forEach(c => {
+        if (c.textContent.includes('Planlanan Vardiya')) {
+          captionText = c.textContent.trim();
+        }
+      });
+
+      const headers = [];
+      const headerCells = doc.querySelectorAll('table.table thead tr th, table.table tr:first-child th');
+      headerCells.forEach((th, i) => {
+        if (i === 0) return;
+        const text = th.textContent.trim();
+        const parts = text.split(/\s+/);
+        headers.push({
+          day: parseInt(parts[0], 10),
+          dayName: parts[1] || ''
+        });
+      });
+
+      const personnel = [];
+      const rows = doc.querySelectorAll('table.table tr[id]');
+      rows.forEach(row => {
+        const name = row.querySelector('td:first-child')?.textContent.trim();
+        const shifts = [];
+        const cells = row.querySelectorAll('td');
+        cells.forEach((td, i) => {
+          if (i === 0) return;
+          shifts.push(td.textContent.trim().toLowerCase());
+        });
+        if (name) personnel.push({ name, shifts });
+      });
+
+      vardiyaData = {
+        caption: captionText,
+        headers,
+        personnel,
+        totalPersonnel: personnel.length
+      };
     }
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlText, 'text/html');
-
-    // Parse Caption
-    let captionText = '';
-    const captions = doc.querySelectorAll('div.caption');
-    captions.forEach(c => {
-      if (c.textContent.includes('Planlanan Vardiya')) {
-        captionText = c.textContent.trim();
-      }
-    });
-
-    // Parse Headers
-    const headers = [];
-    const headerCells = doc.querySelectorAll('table.table thead tr th, table.table tr:first-child th');
-    headerCells.forEach((th, i) => {
-      if (i === 0) return;
-      const text = th.textContent.trim();
-      const parts = text.split(/\s+/);
-      headers.push({
-        day: parseInt(parts[0], 10),
-        dayName: parts[1] || ''
-      });
-    });
-
-    // Parse Data Rows
-    const personnel = [];
-    const rows = doc.querySelectorAll('table.table tr[id]');
-    rows.forEach(row => {
-      const name = row.querySelector('td:first-child')?.textContent.trim();
-      const shifts = [];
-      const cells = row.querySelectorAll('td');
-      
-      cells.forEach((td, i) => {
-        if (i === 0) return;
-        shifts.push(td.textContent.trim().toLowerCase());
-      });
-
-      if (name) {
-        personnel.push({ name, shifts });
-      }
-    });
-
-    const parsedData = {
-      caption: captionText,
-      headers,
-      personnel,
-      totalPersonnel: personnel.length
-    };
-
-    vardiyaData = parsedData;
-    localStorage.setItem('vrd_data', JSON.stringify(parsedData));
+    localStorage.setItem('vrd_data', JSON.stringify(vardiyaData));
     localStorage.setItem('vrd_lastUpdate', new Date().toISOString());
-    
+
     renderCalendar();
     updateResults();
     updateDataStatus();
