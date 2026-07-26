@@ -722,10 +722,10 @@ body::before {
   .results-panel { padding: 12px; }
   .person-card { margin-bottom: 10px; }
   
-  .results-left { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .btn-refresh-bar { padding: 4px 8px; border-radius: 6px; font-size: 10px; gap: 4px; }
-  .results-bar { flex-wrap: nowrap; align-items: flex-start; }
-  .results-title { font-size: 0.75rem; line-height: 1.2; }
+  .refresh-text { display: none; }
+  .btn-refresh-bar { padding: 6px; border-radius: 6px; gap: 0; min-width: 28px; justify-content: center; }
+  .results-bar { flex-wrap: nowrap; }
+  .results-title { font-size: 0.75rem; }
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
@@ -884,7 +884,7 @@ body::before {
 .btn-hamburger { background: rgba(11, 15, 25, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 0 8px; height: 60px; min-width: 40px; flex-shrink: 0; z-index: 20; transition: 0.2s; }
 .btn-hamburger:hover { background: rgba(255,255,255,0.1); }
 .btn-hamburger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; transition: 0.3s; }
-.horizontal-calendar { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; flex: 1; padding: 6px 0; overflow-y: hidden; -webkit-overflow-scrolling: touch; will-change: scroll-position; }
+.horizontal-calendar { position: relative; display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; flex: 1; padding: 6px 0; overflow-y: hidden; -webkit-overflow-scrolling: touch; will-change: scroll-position; }
 .horizontal-calendar::-webkit-scrollbar { display: none; }
 .h-spacer { min-width: calc(50% - 28px); flex-shrink: 0; }
 .h-day { min-width: 50px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111827; border: 2px solid #1f2937; border-radius: 10px; cursor: pointer; scroll-snap-align: center; transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease; transform-origin: center center; color: #64748b; will-change: transform, opacity; }
