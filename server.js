@@ -226,7 +226,125 @@ function generateSessionId() {
   );
 }
 
+// ─── Fetch & Parse Profil ───────────────────────────────────────
+async function fetchProfilData(cookies) {
+  const BASE = 'https://yeniceri.epms.com.tr';
+  const res = await httpsRequest(`${BASE}/Portal/Home/Profil`, {
+    headers: { Cookie: cookies },
+  });
+
+  if (res.body.includes('PersonelGiris') || res.body.includes('/Portal/Giris')) {
+    throw new Error('SESSION_EXPIRED');
+  }
+
+  const $ = cheerio.load(res.body);
+  
+  let fullName = '';
+  const nameSelectors = [
+    'input[name="AdSoyad"]',
+    'input[name="AdiSoyadi"]',
+    'input[name="KullaniciAdi"]',
+    '#AdSoyad',
+    '.profile-username',
+    'h3.profile-username',
+    '.widget-user-username'
+  ];
+  
+  for (const sel of nameSelectors) {
+    const el = $(sel);
+    if (el.length > 0) {
+      if (el.is('input')) {
+        fullName = el.val().trim();
+      } else {
+        fullName = el.text().trim();
+      }
+      // If it's a number (like TC), maybe we want to keep looking, but let's just use it
+      if (fullName && fullName.length > 3 && isNaN(Number(fullName))) break;
+    }
+  }
+
+  let photoUrl = '';
+  const imgSelectors = [
+    'img.profile-user-img',
+    'img.img-circle',
+    '.widget-user-image img',
+    'img[src*="Profil"]',
+    'img[src*="Uploads"]',
+    'img[src*="avatar"]'
+  ];
+  
+  for (const sel of imgSelectors) {
+    const el = $(sel);
+    if (el.length > 0) {
+      photoUrl = el.attr('src');
+      if (photoUrl) {
+        if (!photoUrl.startsWith('http')) {
+          photoUrl = BASE + (photoUrl.startsWith('/') ? '' : '/') + photoUrl;
+        }
+        break;
+      }
+    }
+  }
+
+  let photoBase64 = null;
+  if (photoUrl) {
+    try {
+      const imgRes = await new Promise((resolve, reject) => {
+         const parsed = new URL(photoUrl);
+         const reqOptions = {
+           hostname: parsed.hostname,
+           port: parsed.port || 443,
+           path: parsed.pathname + parsed.search,
+           method: 'GET',
+           headers: { 'Cookie': cookies, 'Referer': `${BASE}/Portal/Home/Profil` },
+           rejectUnauthorized: false
+         };
+         https.get(reqOptions, (r) => {
+           if (r.statusCode !== 200) {
+             resolve(null);
+             return;
+           }
+           const chunks = [];
+           r.on('data', c => chunks.push(c));
+           r.on('end', () => {
+              const buffer = Buffer.concat(chunks);
+              const type = r.headers['content-type'] || 'image/jpeg';
+              resolve(`data:${type};base64,${buffer.toString('base64')}`);
+           });
+         }).on('error', reject);
+      });
+      if (imgRes) {
+        photoBase64 = imgRes;
+      }
+    } catch(e) {
+      console.error('Failed to fetch profile image', e.message);
+    }
+  }
+
+  return { fullName, photoBase64, photoUrl };
+}
+
 // ─── API Routes ──────────────────────────────────────────────────
+
+// Profil data endpoint
+app.get('/api/profil', async (req, res) => {
+  const sessionId = req.headers['x-session-id'];
+  if (!sessionId || !sessions.has(sessionId)) {
+    return res.status(401).json({ error: 'Oturum bulunamadı.' });
+  }
+  const session = sessions.get(sessionId);
+  try {
+    const data = await fetchProfilData(session.cookies);
+    res.json(data);
+  } catch (err) {
+    if (err.message === 'SESSION_EXPIRED') {
+      sessions.delete(sessionId);
+      return res.status(401).json({ error: 'Oturum sona erdi.' });
+    }
+    console.error('Profil fetch error:', err.message);
+    res.status(500).json({ error: 'Profil alınamadı.' });
+  }
+});
 
 // Login endpoint
 app.post('/api/login', async (req, res) => {

@@ -94,7 +94,12 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar-menu" id="sidebarMenu">
       <div class="sidebar-header">
-        <h3 id="sidebarUserName">Hoş geldiniz</h3>
+        <div class="sidebar-profile">
+          <img id="sidebarProfileImg" src="" alt="" style="display: none;">
+          <div class="sidebar-profile-info">
+            <h3 id="sidebarUserName">Hoş geldiniz</h3>
+          </div>
+        </div>
         <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
       </div>
       <div class="calendar-status" id="dataStatus">Henüz veri yüklenmedi</div>
@@ -339,6 +344,8 @@ loginToggle.addEventListener('click', () => {
     sessionId = null;
     localStorage.removeItem('vrd_session');
     localStorage.removeItem('vrd_user');
+    localStorage.removeItem('vrd_user_fullname');
+    localStorage.removeItem('vrd_user_photo');
     updateLoginState();
     toggleSidebar();
   } else {
@@ -347,18 +354,81 @@ loginToggle.addEventListener('click', () => {
   }
 });
 
+async function fetchProfile() {
+  if (!sessionId) return;
+  try {
+    let fullName = '';
+    let photoUrl = '';
+
+    if (!isNative) {
+      const res = await fetch('/api/profil', {
+        headers: { 'x-session-id': sessionId }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        fullName = data.fullName;
+        photoUrl = data.photoBase64 || data.photoUrl; // For web, use base64 if available to avoid CORS
+      }
+    } else {
+      const res = await fetch('https://yeniceri.epms.com.tr/Portal/Home/Profil');
+      const htmlText = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+
+      const nameSelectors = ['input[name="AdSoyad"]', 'input[name="AdiSoyadi"]', 'input[name="KullaniciAdi"]', '#AdSoyad', '.profile-username', 'h3.profile-username', '.widget-user-username'];
+      for (const sel of nameSelectors) {
+        const el = doc.querySelector(sel);
+        if (el) {
+          fullName = el.tagName === 'INPUT' ? el.value.trim() : el.textContent.trim();
+          if (fullName && fullName.length > 3 && isNaN(Number(fullName))) break;
+        }
+      }
+
+      const imgSelectors = ['img.profile-user-img', 'img.img-circle', '.widget-user-image img', 'img[src*="Profil"]', 'img[src*="Uploads"]', 'img[src*="avatar"]'];
+      for (const sel of imgSelectors) {
+        const el = doc.querySelector(sel);
+        if (el) {
+          photoUrl = el.getAttribute('src');
+          if (photoUrl) {
+            if (!photoUrl.startsWith('http')) {
+              photoUrl = 'https://yeniceri.epms.com.tr' + (photoUrl.startsWith('/') ? '' : '/') + photoUrl;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    if (fullName) localStorage.setItem('vrd_user_fullname', fullName);
+    if (photoUrl) localStorage.setItem('vrd_user_photo', photoUrl);
+    updateLoginState();
+  } catch (e) {
+    console.error('Profil fetch failed', e);
+  }
+}
+
 function updateLoginState() {
   const isOnline = !!sessionId;
   loginLabel.textContent = isOnline ? 'Çıkış Yap' : 'Oturum Aç';
   loginDot.classList.toggle('online', isOnline);
   
   const sidebarUserName = $('#sidebarUserName');
+  const sidebarProfileImg = $('#sidebarProfileImg');
+  
   if (sidebarUserName) {
+    const storedFullname = localStorage.getItem('vrd_user_fullname');
     const storedUser = localStorage.getItem('vrd_user');
-    if (isOnline && storedUser) {
-      sidebarUserName.textContent = storedUser;
+    const storedPhoto = localStorage.getItem('vrd_user_photo');
+
+    if (isOnline) {
+      sidebarUserName.textContent = storedFullname || storedUser || 'Hoş geldiniz';
+      if (storedPhoto && sidebarProfileImg) {
+        sidebarProfileImg.src = storedPhoto;
+        sidebarProfileImg.style.display = 'block';
+      }
     } else {
       sidebarUserName.textContent = 'Hoş geldiniz';
+      if (sidebarProfileImg) sidebarProfileImg.style.display = 'none';
     }
   }
 }
@@ -449,6 +519,9 @@ async function fetchData() {
     renderCalendar();
     updateResults();
     updateDataStatus();
+    
+    // Asynchronously update profile info
+    fetchProfile();
   } catch (err) {
     if (err.message === 'oturum') {
       sessionId = null;
