@@ -215,6 +215,24 @@ body::before {
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--theme-primary-glow); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+.btn-secondary {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+.btn-secondary.active { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 600; }
+
 .btn-primary .spinner { display: none; }
 .btn-primary.loading .spinner {
   display: inline-block;
@@ -856,8 +874,9 @@ body::before {
 
 .stats-controls { display: flex; gap: 10px; margin-bottom: 20px; }
 .person-select-wrapper { flex: 1; position: relative; }
-#personStatsSelect { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 10px; outline: none; appearance: none; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s; }
+#personStatsSelect { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: var(--radius); outline: none; appearance: none; font-size: 0.9rem; font-family: inherit; font-weight: 500; transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer; }
 #personStatsSelect:focus { border-color: rgba(56,189,248,0.5); box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+#personStatsSelect option { background: #1a2333; color: #fff; }
 .stats-content { display: block; max-height: 400px; overflow-y: auto; padding-right: 5px; }
 .stats-content::-webkit-scrollbar { width: 4px; }
 .stats-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
