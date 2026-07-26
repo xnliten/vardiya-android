@@ -835,9 +835,11 @@ body::before {
 
 
 /* === ARCHIVE & STATS MODULES === */
-.sidebar-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
-.btn-sidebar { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.2s ease; }
-.btn-sidebar:hover { background: rgba(255,255,255,0.1); }
+.sidebar-data-status { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin: -5px 0 15px 0; text-align: center; font-size: 11.5px; color: #8ba3cb; line-height: 1.4; }
+.sidebar-actions { display: flex; flex-direction: column; gap: 4px; }
+.btn-sidebar { background: transparent; border: none; color: #a1b0cb; padding: 12px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14.5px; font-weight: 500; transition: all 0.2s ease; text-align: left; width: 100%; }
+.btn-sidebar:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(3px); }
+.btn-sidebar .icon { font-size: 18px; opacity: 0.9; }
 
 .archive-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
 .archive-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
