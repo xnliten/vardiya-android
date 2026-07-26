@@ -471,7 +471,7 @@ body::before {
 
 .results-bar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
   padding-bottom: 6px;
@@ -481,8 +481,10 @@ body::before {
 
 .results-left {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
