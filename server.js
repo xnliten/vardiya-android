@@ -229,6 +229,7 @@ function generateSessionId() {
 // ─── Fetch & Parse Profil ───────────────────────────────────────
 async function fetchProfilData(cookies) {
   const BASE = 'https://yeniceri.epms.com.tr';
+  
   const res = await httpsRequest(`${BASE}/Portal/Home/Profil`, {
     headers: { Cookie: cookies },
   });
@@ -241,6 +242,7 @@ async function fetchProfilData(cookies) {
   
   let fullName = '';
   const nameSelectors = [
+    '.profile-usertitle-name', '.username',
     'input[name="AdSoyad"]',
     'input[name="AdiSoyadi"]',
     'input[name="KullaniciAdi"]',

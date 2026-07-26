@@ -375,7 +375,7 @@ async function fetchProfile() {
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlText, 'text/html');
 
-      const nameSelectors = ['input[name="AdSoyad"]', 'input[name="AdiSoyadi"]', 'input[name="KullaniciAdi"]', '#AdSoyad', '.profile-username', 'h3.profile-username', '.widget-user-username'];
+      const nameSelectors = ['.profile-usertitle-name', '.username', 'input[name="AdSoyad"]', 'input[name="AdiSoyadi"]', 'input[name="KullaniciAdi"]', '#AdSoyad', '.profile-username', 'h3.profile-username', '.widget-user-username'];
       for (const sel of nameSelectors) {
         const el = doc.querySelector(sel);
         if (el) {
