@@ -721,6 +721,11 @@ body::before {
 
   .results-panel { padding: 12px; }
   .person-card { margin-bottom: 10px; }
+  
+  .refresh-text { display: none; }
+  .btn-refresh-bar { padding: 6px; border-radius: 6px; gap: 0; min-width: 28px; justify-content: center; }
+  .results-bar { flex-wrap: nowrap; }
+  .results-title { font-size: 0.75rem; }
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
