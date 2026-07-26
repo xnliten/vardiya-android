@@ -473,8 +473,8 @@ body::before {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
   gap: 8px;
 }
@@ -488,18 +488,18 @@ body::before {
 }
 
 .results-title {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #f1f5f9;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .results-count {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--theme-primary);
   background: var(--theme-primary-glow);
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: var(--radius-full);
 }
 
@@ -524,7 +524,7 @@ body::before {
   background: var(--bg-glass);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   transition: all 0.12s ease;
   animation: listIn 0.25s ease backwards;
   overflow: hidden;
@@ -532,14 +532,14 @@ body::before {
 .person-card-header {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 6px;
+  padding: 8px 10px;
   width: 100%;
 }
 .person-top-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 .person-card:hover {
@@ -553,18 +553,18 @@ body::before {
 }
 
 .person-avatar {
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  width: 26px; height: 26px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   flex-shrink: 0;
 }
 
 .person-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   width: 140px; /* fixed width for alignment */
   white-space: nowrap;
@@ -579,8 +579,8 @@ body::before {
   justify-content: space-between;
   align-items: center;
   background: rgba(0,0,0,0.2);
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .timeline-day {
