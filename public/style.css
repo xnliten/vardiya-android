@@ -109,7 +109,9 @@ body::before {
 
 .refresh-icon {
   font-size: 1rem;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.3s ease;
 }
 .refresh-icon.spinning { animation: spin 0.8s linear infinite; }
@@ -740,9 +742,9 @@ body::before {
   .results-panel { padding: 12px; }
   .person-card { margin-bottom: 10px; }
   
-  .refresh-text { display: none; }
-  .btn-refresh-bar { padding: 6px; border-radius: 6px; gap: 0; min-width: 28px; justify-content: center; }
-  .results-bar { flex-wrap: nowrap; }
+  .refresh-text { display: inline-block; font-size: 11px; }
+  .btn-refresh-bar { padding: 6px 10px; border-radius: 8px; gap: 6px; min-width: 80px; justify-content: center; display: flex; align-items: center; }
+  .results-bar { flex-wrap: nowrap; gap: 5px; }
   .results-title { font-size: 0.75rem; }
 }
 
@@ -926,4 +928,3 @@ body::before {
 
 .btn-refresh-bar { background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); color: #3498db; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
 .btn-refresh-bar:hover { background: rgba(52, 152, 219, 0.25); }
-.btn-refresh-bar .refresh-icon { font-size: 12px; }
