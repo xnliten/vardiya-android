@@ -399,11 +399,20 @@ async function fetchProfile() {
       }
     }
 
-    if (fullName) localStorage.setItem('vrd_user_fullname', fullName);
+    if (fullName) {
+      localStorage.setItem('vrd_user_fullname', fullName);
+    } else {
+      localStorage.setItem('vrd_user_fullname', localStorage.getItem('vrd_user') || 'Kullanıcı');
+    }
+    
     if (photoUrl) localStorage.setItem('vrd_user_photo', photoUrl);
     updateLoginState();
   } catch (e) {
     console.error('Profil fetch failed', e);
+    if (!localStorage.getItem('vrd_user_fullname')) {
+      localStorage.setItem('vrd_user_fullname', localStorage.getItem('vrd_user') || 'Kullanıcı');
+      updateLoginState();
+    }
   }
 }
 
@@ -417,11 +426,10 @@ function updateLoginState() {
   
   if (sidebarUserName) {
     const storedFullname = localStorage.getItem('vrd_user_fullname');
-    const storedUser = localStorage.getItem('vrd_user');
     const storedPhoto = localStorage.getItem('vrd_user_photo');
 
     if (isOnline) {
-      sidebarUserName.textContent = storedFullname || storedUser || 'Hoş geldiniz';
+      sidebarUserName.textContent = storedFullname || 'Bilgiler yükleniyor...';
       if (storedPhoto && sidebarProfileImg) {
         sidebarProfileImg.src = storedPhoto;
         sidebarProfileImg.style.display = 'block';
