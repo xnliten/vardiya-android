@@ -94,14 +94,11 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar-menu" id="sidebarMenu">
       <div class="sidebar-header">
-        <h3>Menü</h3>
+        <h3 id="sidebarUserName">Hoş geldiniz</h3>
         <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
       </div>
       <div class="calendar-status" id="dataStatus">Henüz veri yüklenmedi</div>
       <div class="sidebar-actions">
-        <button class="btn-sidebar" id="loginToggle">
-          <span class="icon login-dot" id="loginDot"></span> <span id="loginLabel">Oturum Aç</span>
-        </button>
         <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
           <span class="icon">📊</span> İstatistikler
         </button>
@@ -111,8 +108,10 @@
         <button class="btn-sidebar" id="btnSaveArchive" onclick="saveCurrentToArchive(); toggleSidebar();">
           <span class="icon">💾</span> Günceli Kaydet
         </button>
-        <button class="btn-sidebar" id="refreshBtn" style="margin-top: 15px; background: rgba(52, 152, 219, 0.2);">
-          <span class="refresh-icon" id="refreshIcon">↻</span> Güncelle
+      </div>
+      <div class="sidebar-bottom">
+        <button class="btn-sidebar btn-logout" id="loginToggle">
+          <span class="icon login-dot" id="loginDot"></span> <span id="loginLabel">Oturum Aç</span>
         </button>
       </div>
     </aside>
@@ -177,6 +176,9 @@
               <span class="results-title" id="resultsTitle">Bir tarih seçin</span>
               <span class="results-count" id="resultsCount"></span>
             </div>
+            <button class="btn-refresh-bar" id="refreshBtn" title="Verileri Güncelle">
+              <span class="refresh-icon" id="refreshIcon">↻</span> Güncelle
+            </button>
           </div>
           <ul class="person-list" id="personList"></ul>
           <div class="results-empty" id="resultsEmpty">
@@ -347,8 +349,18 @@ loginToggle.addEventListener('click', () => {
 
 function updateLoginState() {
   const isOnline = !!sessionId;
-  loginLabel.textContent = isOnline ? 'Çıkış' : 'Oturum Aç';
+  loginLabel.textContent = isOnline ? 'Çıkış Yap' : 'Oturum Aç';
   loginDot.classList.toggle('online', isOnline);
+  
+  const sidebarUserName = $('#sidebarUserName');
+  if (sidebarUserName) {
+    const storedUser = localStorage.getItem('vrd_user');
+    if (isOnline && storedUser) {
+      sidebarUserName.textContent = storedUser;
+    } else {
+      sidebarUserName.textContent = 'Hoş geldiniz';
+    }
+  }
 }
 
 // ═══ Fetch Data ═══
@@ -597,33 +609,38 @@ function renderHorizontalCalendar(monthOverride, yearOverride) {
 
 const updateRotaryStyles = () => {
   const containerCenter = hContainer.scrollLeft + (hContainer.clientWidth / 2);
-  hContainer.querySelectorAll('.h-day').forEach(item => {
+  const items = hContainer.querySelectorAll('.h-day');
+  const maxDist = hContainer.clientWidth / 1.5;
+  
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     const itemCenter = item.offsetLeft + (item.clientWidth / 2);
     const diff = itemCenter - containerCenter;
-    const maxDist = hContainer.clientWidth / 1.5;
     let ratio = diff / maxDist;
     if (ratio > 1) ratio = 1;
     if (ratio < -1) ratio = -1;
     const absRatio = Math.abs(ratio);
 
-    const scale = 1 - (absRatio * 0.2);
-    const opacity = 1 - (absRatio * 0.5);
-    const rotateX = ratio * 20;
+    const scale = 1 - (absRatio * 0.15);
+    const opacity = 1 - (absRatio * 0.4);
 
-    item.style.transform = `perspective(500px) rotateX(${rotateX}deg) scale(${scale})`;
-    if (!item.classList.contains('selected')) {
-      item.style.opacity = opacity;
-    } else {
+    if (item.classList.contains('selected')) {
+      item.style.transform = `scale(${scale * 1.08})`;
       item.style.opacity = 1;
-      item.style.transform = `perspective(500px) rotateX(${rotateX}deg) scale(${scale * 1.1})`;
+    } else {
+      item.style.transform = `scale(${scale})`;
+      item.style.opacity = opacity;
     }
-  });
+  }
 };
 
-// Rotary Scroll Listener
+// Rotary Scroll Listener (RAF optimized)
+let scrollRafId = null;
 let scrollTimeout;
 hContainer.addEventListener('scroll', () => {
-  updateRotaryStyles();
+  if (scrollRafId) cancelAnimationFrame(scrollRafId);
+  scrollRafId = requestAnimationFrame(updateRotaryStyles);
+  
   clearTimeout(scrollTimeout);
   scrollTimeout = setTimeout(() => {
     const containerCenter = hContainer.scrollLeft + (hContainer.clientWidth / 2);
@@ -640,10 +657,10 @@ hContainer.addEventListener('scroll', () => {
     });
     
     if (closestDay && parseInt(closestDay.dataset.day, 10) !== selectedDay) {
-      selectDay(parseInt(closestDay.dataset.day, 10), false); // false = don't force scroll back
+      selectDay(parseInt(closestDay.dataset.day, 10), false);
     }
-  }, 100); // 100ms debounce
-});
+  }, 150);
+}, { passive: true });
 
 function scrollToDay(dayEl) {
   const containerCenter = hContainer.clientWidth / 2;
@@ -669,12 +686,6 @@ function selectDay(day, autoScroll = true) {
     if (isSel && autoScroll) scrollToDay(btn);
   });
   updateResults();
-  
-  // Auto-close full calendar on mobile when day is selected
-  const fullCal = $('#fullCalendarWrapper');
-  if (fullCal.style.display === 'block') {
-    toggleFullCalendar();
-  }
 }
 
 // ═══ Shift Selection ═══
@@ -710,21 +721,30 @@ function updateResults() {
 
   const headerText = $('#calendarHeader').textContent || '';
   const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-  let curMonthName = "";
-  monthNames.forEach(m => {
-    if (headerText.includes(m)) curMonthName = m;
+  const dayOfWeekNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+  
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  monthNames.forEach((m, idx) => {
+    if (headerText.includes(m)) currentMonth = idx;
   });
+  const yearMatch = headerText.match(/20\d{2}/);
+  if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
+
+  const dateObj = new Date(currentYear, currentMonth, selectedDay);
+  const fullDayName = dayOfWeekNames[dateObj.getDay()];
+  const dateStr = `${selectedDay} ${monthNames[currentMonth]} ${currentYear} ${fullDayName}`;
 
   const prevDayNum = selectedDay - 1;
   const currDayNum = selectedDay;
   const nextDayNum = selectedDay + 1;
 
-  const prevLabelText = prevDayNum > 0 ? `${prevDayNum} ${curMonthName}`.trim() : `${prevDayNum}. gün`;
-  const currLabelText = `${currDayNum} ${curMonthName}`.trim();
-  const nextLabelText = nextDayNum <= vardiyaData.headers.length ? `${nextDayNum} ${curMonthName}`.trim() : `${nextDayNum}. gün`;
+  const prevLabelText = prevDayNum > 0 ? `${prevDayNum} ${monthNames[currentMonth]}`.trim() : `${prevDayNum}. gün`;
+  const currLabelText = `${currDayNum} ${monthNames[currentMonth]}`.trim();
+  const nextLabelText = nextDayNum <= vardiyaData.headers.length ? `${nextDayNum} ${monthNames[currentMonth]}`.trim() : `${nextDayNum}. gün`;
 
   const shiftLabel = selectedShift === 'all' ? 'Tüm Vardiyalar ve İzinler' : `${SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase()}`;
-  resultsTitle.textContent = `${selectedDay}. gün — ${shiftLabel}`;
+  resultsTitle.textContent = `${dateStr} — ${shiftLabel}`;
   resultsCount.textContent = `${filtered.length} kişi`;
 
   if (filtered.length === 0) {
