@@ -473,10 +473,10 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--border);
-  gap: 8px;
+  gap: 6px;
 }
 
 .results-left {
@@ -892,6 +892,6 @@ body::before {
 .btn-expand-calendar.open { background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.3); }
 .full-calendar-wrapper { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
 
-.btn-refresh-bar { background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); color: #3498db; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
+.btn-refresh-bar { background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); color: #3498db; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
 .btn-refresh-bar:hover { background: rgba(52, 152, 219, 0.25); }
-.btn-refresh-bar .refresh-icon { font-size: 14px; }
+.btn-refresh-bar .refresh-icon { font-size: 12px; }
