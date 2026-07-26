@@ -849,8 +849,12 @@ function updateResults() {
   const currLabelText = `${currDayNum} ${monthNames[currentMonth]}`.trim();
   const nextLabelText = nextDayNum <= vardiyaData.headers.length ? `${nextDayNum} ${monthNames[currentMonth]}`.trim() : `${nextDayNum}. gün`;
 
-  const shiftLabel = selectedShift === 'all' ? 'Tüm Vardiyalar ve İzinler' : `${SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase()}`;
-  resultsTitle.textContent = `${dateStr} — ${shiftLabel}`;
+  if (selectedShift === 'all') {
+    resultsTitle.textContent = dateStr;
+  } else {
+    const shiftLabel = SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase();
+    resultsTitle.textContent = `${dateStr} — ${shiftLabel}`;
+  }
   resultsCount.textContent = `${filtered.length} kişi`;
 
   if (filtered.length === 0) {
