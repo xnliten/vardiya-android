@@ -682,10 +682,20 @@ function renderHorizontalCalendar(monthOverride, yearOverride) {
   
   // Auto-scroll to selected day after render
   setTimeout(() => {
-    const selectedEl = hContainer.querySelector('.h-day.selected');
-    if (selectedEl) scrollToDay(selectedEl);
+    let selectedEl = hContainer.querySelector('.h-day.selected');
+    if (!selectedEl) {
+      selectedEl = hContainer.querySelector('.h-day.today');
+      if (selectedEl) {
+        selectDay(parseInt(selectedEl.dataset.day, 10), false);
+      }
+    }
+    if (selectedEl) {
+      const containerCenter = hContainer.clientWidth / 2;
+      const dayCenter = selectedEl.offsetLeft + (selectedEl.clientWidth / 2);
+      hContainer.scrollTo({ left: dayCenter - containerCenter, behavior: 'auto' });
+    }
     if (typeof updateRotaryStyles === 'function') updateRotaryStyles();
-  }, 100);
+  }, 150);
 }
 
 const updateRotaryStyles = () => {
