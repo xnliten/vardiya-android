@@ -859,7 +859,7 @@ body::before {
 
 .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
-.sidebar-menu { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: #0b0f19; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 25px 20px; box-shadow: 5px 0 25px rgba(0,0,0,0.5); }
+.sidebar-menu { position: fixed; top: 0; left: 0; width: 240px; height: 100%; background: #0b0f19; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 25px 20px; box-shadow: 5px 0 25px rgba(0,0,0,0.5); }
 .sidebar-menu.open { transform: translateX(0); }
 .sidebar-header { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; width: 100%; }
 .sidebar-profile { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; text-align: center; }
