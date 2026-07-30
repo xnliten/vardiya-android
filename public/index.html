@@ -475,20 +475,7 @@ function closeLoginModal() {
   loginModal.classList.remove('open');
 }
 
-loginToggle.addEventListener('click', () => {
-  if (sessionId) {
-    sessionId = null;
-    localStorage.removeItem('vrd_session');
-    localStorage.removeItem('vrd_user');
-    localStorage.removeItem('vrd_user_fullname');
-    localStorage.removeItem('vrd_user_photo');
-    updateLoginState();
-    toggleSidebar();
-  } else {
-    openLoginModal();
-    toggleSidebar();
-  }
-});
+// Old login toggle removed
 
 async function fetchProfile() {
   if (!sessionId) return;
@@ -1721,6 +1708,9 @@ if (btnLogoutBottom) {
   btnLogoutBottom.addEventListener('click', () => {
     sessionId = null;
     localStorage.removeItem('vrd_session');
+    localStorage.removeItem('vrd_user');
+    localStorage.removeItem('vrd_user_fullname');
+    localStorage.removeItem('vrd_user_photo');
     updateLoginState();
     toggleSidebar();
   });
