@@ -148,6 +148,53 @@
       </div>
     </div>
 
+    <!-- ═══ MONTH TABLE VIEW ═══ -->
+    <div class="pair-view-container" id="monthTableView" style="display: none;">
+      <div class="pair-view-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="pair-view-title">
+          <button class="btn-back" onclick="closeMonthTableView()" title="Geri Dön">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <h2>Tüm Ay Tablosu</h2>
+        </div>
+        <button class="btn-primary" onclick="window.print()" style="padding: 6px 12px; font-size: 13px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Yazdır
+        </button>
+      </div>
+      <div class="pair-view-content" style="max-width: 100%; padding: 10px;">
+        <div class="month-table-wrapper" style="overflow-x: auto; background: var(--bg-secondary); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); max-height: calc(100vh - 100px);">
+          <table class="month-table">
+            <thead><tr id="monthTableHead"></tr></thead>
+            <tbody id="monthTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ COMPARE VIEW ═══ -->
+    <div class="pair-view-container" id="compareView" style="display: none;">
+      <div class="pair-view-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="pair-view-title">
+          <button class="btn-back" onclick="closeCompareView()" title="Geri Dön">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <h2 id="compareTitle">Arşiv Karşılaştırma</h2>
+        </div>
+        <div id="compareSummary" style="font-size: 12px; color: var(--text-muted);"></div>
+        <button class="btn-primary" onclick="window.print()" style="padding: 6px 12px; font-size: 13px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Yazdır
+        </button>
+      </div>
+      <div class="pair-view-content" style="max-width: 100%; padding: 10px;">
+        <div class="month-table-wrapper" style="overflow-x: auto; background: var(--bg-secondary); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); max-height: calc(100vh - 100px);">
+          <table class="month-table">
+            <thead><tr id="compareTableHead"></tr></thead>
+            <tbody id="compareTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
 
     <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -171,6 +218,12 @@
         </button>
         <button class="btn-sidebar" id="btnArchive" onclick="openArchiveModal(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg></span> Arşiv Listesi
+        </button>
+        <button class="btn-sidebar" id="btnMonthTable" onclick="openMonthTableView(); toggleSidebar();">
+          <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></span> Tüm Ay (Tablo)
+        </button>
+        <button class="btn-sidebar" id="btnPrint" onclick="window.print(); toggleSidebar();">
+          <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></span> Yazdır / PDF
         </button>
         <button class="btn-sidebar" id="btnSaveArchive" onclick="saveCurrentToArchive(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></span> Günceli Kaydet
@@ -1128,12 +1181,15 @@ function openArchiveModal() {
           <div class="archive-name">${arch.name}</div>
           <div class="archive-date">${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR')}</div>
         </div>
-        <div class="archive-actions">
-          <button class="btn-icon" title="Yükle" onclick="loadArchive(${arch.id})">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <div class="archive-actions" style="display: flex; gap: 4px; margin-top: 8px;">
+          <button class="btn-sidebar" style="padding: 6px; justify-content:center; flex:1;" onclick="compareWithArchive(${arch.id})" title="Karşılaştır">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
           </button>
-          <button class="btn-icon" title="Sil" onclick="promptDeleteArchive(${arch.id})">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <button class="btn-sidebar" style="padding: 6px; justify-content:center; flex:1;" onclick="loadArchive(${arch.id})" title="Yükle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          </button>
+          <button class="btn-sidebar" style="padding: 6px; justify-content:center; flex:1;" onclick="promptDeleteArchive(${arch.id})" title="Sil">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
       `;
@@ -1453,6 +1509,131 @@ function togglePairExpand(btn) {
   } else {
     btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
   }
+}
+
+// ═══ MONTH TABLE VIEW (Faz 5) ═══
+function openMonthTableView() {
+  if (!vardiyaData) return alert('Veri yüklenmedi.');
+  
+  // Hide main content
+  document.querySelector('.calendar-container').style.display = 'none';
+  document.querySelector('.content-panel').style.display = 'none';
+  if(document.getElementById('pairView')) document.getElementById('pairView').style.display = 'none';
+  if(document.getElementById('compareView')) document.getElementById('compareView').style.display = 'none';
+  
+  $('#monthTableView').style.display = 'flex';
+  renderMonthTable();
+}
+
+function closeMonthTableView() {
+  document.querySelector('.calendar-container').style.display = '';
+  document.querySelector('.content-panel').style.display = 'flex';
+  $('#monthTableView').style.display = 'none';
+}
+
+function renderMonthTable() {
+  const thead = $('#monthTableHead');
+  const tbody = $('#monthTableBody');
+  const daysInMonth = vardiyaData.headers.length;
+  
+  let headHtml = `<th>Personel</th>`;
+  for(let i=0; i<daysInMonth; i++) {
+    headHtml += `<th>${i+1}</th>`;
+  }
+  thead.innerHTML = headHtml;
+  
+  let bodyHtml = '';
+  const sorted = [...vardiyaData.personnel].sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  
+  sorted.forEach(p => {
+    let rowHtml = `<tr><td class="mt-name">${capitalize(p.name)}</td>`;
+    for(let i=0; i<daysInMonth; i++) {
+      const s = p.shifts[i];
+      const cls = getShiftCellClass(s);
+      rowHtml += `<td class="mt-cell ${cls}">${s ? s.toUpperCase() : ''}</td>`;
+    }
+    rowHtml += `</tr>`;
+    bodyHtml += rowHtml;
+  });
+  
+  tbody.innerHTML = bodyHtml;
+}
+
+// ═══ COMPARE VIEW (Faz 4) ═══
+function compareWithArchive(id) {
+  if (!vardiyaData) return alert('Güncel veri yüklenmedi!');
+  const arch = archives.find(a => a.id === id);
+  if (!arch) return;
+  
+  closeArchiveModal();
+  openCompareView(arch);
+}
+
+function openCompareView(archive) {
+  document.querySelector('.calendar-container').style.display = 'none';
+  document.querySelector('.content-panel').style.display = 'none';
+  if(document.getElementById('pairView')) document.getElementById('pairView').style.display = 'none';
+  if(document.getElementById('monthTableView')) document.getElementById('monthTableView').style.display = 'none';
+  
+  $('#compareView').style.display = 'flex';
+  renderCompareTable(archive);
+}
+
+function closeCompareView() {
+  document.querySelector('.calendar-container').style.display = '';
+  document.querySelector('.content-panel').style.display = 'flex';
+  $('#compareView').style.display = 'none';
+}
+
+function renderCompareTable(archive) {
+  $('#compareTitle').textContent = `Karşılaştırma: Güncel vs ${archive.name}`;
+  
+  const thead = $('#compareTableHead');
+  const tbody = $('#compareTableBody');
+  
+  const daysInMonth = Math.max(vardiyaData.headers.length, archive.data.headers.length);
+  
+  let headHtml = `<th>Personel</th>`;
+  for(let i=0; i<daysInMonth; i++) {
+    headHtml += `<th>${i+1}</th>`;
+  }
+  thead.innerHTML = headHtml;
+  
+  let bodyHtml = '';
+  const currentPersonnel = [...vardiyaData.personnel].sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  
+  let totalChanges = 0;
+  
+  currentPersonnel.forEach(p => {
+    const archP = archive.data.personnel.find(x => x.name.toLowerCase() === p.name.toLowerCase());
+    
+    let personChanged = false;
+    let rowCells = '';
+    
+    for(let i=0; i<daysInMonth; i++) {
+      const currS = p.shifts[i] || '';
+      const archS = archP && archP.shifts[i] ? archP.shifts[i] : '';
+      
+      const currCls = getShiftCellClass(currS);
+      
+      if (currS !== archS) {
+        personChanged = true;
+        totalChanges++;
+        rowCells += `<td class="mt-cell diff-changed" title="Arşiv: ${archS.toUpperCase() || 'Boş'} → Güncel: ${currS.toUpperCase() || 'Boş'}">
+          <div style="font-size:8px; text-decoration:line-through; opacity:0.6;">${archS.toUpperCase()}</div>
+          <div class="${currCls}">${currS.toUpperCase()}</div>
+        </td>`;
+      } else {
+        rowCells += `<td class="mt-cell ${currCls}" style="opacity: 0.4;">${currS.toUpperCase()}</td>`;
+      }
+    }
+    
+    const nameCls = personChanged ? 'mt-name diff-person' : 'mt-name';
+    bodyHtml += `<tr><td class="${nameCls}">${capitalize(p.name)}</td>${rowCells}</tr>`;
+  });
+  
+  tbody.innerHTML = bodyHtml;
+  $('#compareSummary').innerHTML = `<span style="color:#ef4444; font-weight:700;">Toplam ${totalChanges} vardiya farklılığı bulundu.</span> (Kırmızı/Üstü Çizili: Arşiv, Renkli: Güncel)`;
 }
 
 if ('serviceWorker' in navigator) {

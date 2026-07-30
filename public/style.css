@@ -1314,3 +1314,114 @@ body::before {
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.06);
 }
+
+/* ══════════════════
+   MONTH TABLE & COMPARE STYLES (Faz 4 & 5)
+   ══════════════════ */
+.month-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.month-table th, .month-table td {
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 4px;
+  text-align: center;
+}
+.month-table th {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.month-table th:first-child {
+  left: 0;
+  z-index: 11;
+  text-align: left;
+  padding-left: 10px;
+}
+.month-table td.mt-name {
+  text-align: left;
+  font-weight: 500;
+  padding-left: 10px;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  background: var(--bg-secondary);
+  z-index: 5;
+}
+.mt-cell {
+  font-weight: 700;
+}
+
+/* Compare View Styles */
+.diff-changed {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+.diff-person {
+  border-left: 3px solid #ef4444 !important;
+  color: #fff !important;
+}
+
+/* ══════════════════
+   PRINT STYLES (Phase 3)
+   ══════════════════ */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .sidebar-menu, .sidebar-overlay, .btn-hamburger, .modal-overlay,
+  .calendar-container, .shift-groups, .results-actions, .pair-view-header,
+  .pair-controls, .pair-filters {
+    display: none !important;
+  }
+  .main-layout {
+    display: block !important;
+  }
+  .content-panel, .pair-view-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .results-panel {
+    background: none !important;
+    border: none !important;
+  }
+  .results-title, .results-count {
+    color: #000 !important;
+  }
+  .person-card, .pair-person-card, .pair-selected-card {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .person-name {
+    color: #000 !important;
+  }
+  .timeline-day .t-val {
+    border: 1px solid #000 !important;
+  }
+  .pair-cell {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .month-table th, .month-table td {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+  }
+  .month-table th {
+    background: #eee !important;
+  }
+  .month-table td.mt-name {
+    background: #fff !important;
+  }
+}
