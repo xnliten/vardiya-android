@@ -793,7 +793,8 @@ body::before {
   .btn-refresh-bar { padding: 6px 10px; border-radius: 8px; gap: 6px; min-width: 80px; justify-content: center; display: flex; align-items: center; }
   .results-bar { flex-wrap: wrap; gap: 8px; }
   .results-left { width: 100%; flex-shrink: 0; }
-  .results-title { font-size: 0.85rem; }
+  .results-title { font-size: 0.72rem; }
+  .results-count { font-size: 0.65rem; padding: 2px 6px; }
   
   /* Pair View Mobile Fixes */
   .pair-view-header {

@@ -981,15 +981,7 @@ function updateResults() {
     resultsTitle.textContent = `${dateStr}`;
   } else {
     const shiftLabel = SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase();
-    
-    let shiftTime = "";
-    if(selectedShift === '1') shiftTime = "(00-08)";
-    else if(selectedShift === '2') shiftTime = "(08-16)";
-    else if(selectedShift === '3') shiftTime = "(16-00)";
-    else if(selectedShift === '4') shiftTime = "(08-18)";
-    else shiftTime = "";
-    
-    resultsTitle.textContent = `${dateStr} — ${shiftLabel} ${shiftTime}`;
+    resultsTitle.textContent = `${dateStr} — ${shiftLabel}`;
   }
   
   if (resultsCount) {
