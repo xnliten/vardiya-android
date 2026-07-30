@@ -1,4 +1,4 @@
-const CACHE_NAME = "vardiya-cache-v9";
+const CACHE_NAME = "vardiya-cache-v10";
 const urlsToCache = [
   "/",
   "/index.html",

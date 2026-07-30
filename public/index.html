@@ -365,9 +365,6 @@ const loginModal = $('#loginModal');
 const loginForm = $('#loginForm');
 const loginBtn = $('#loginBtn');
 const loginError = $('#loginError');
-const loginToggle = $('#loginToggle');
-const loginLabel = $('#loginLabel');
-const loginDot = $('#loginDot');
 const refreshBtn = $('#refreshBtn');
 const refreshIcon = $('#refreshIcon');
 const dateGrid = $('#dateGrid');
@@ -475,7 +472,7 @@ function closeLoginModal() {
   loginModal.classList.remove('open');
 }
 
-// Old login toggle removed
+// Event listener for loginTop is at the end of file
 
 async function fetchProfile() {
   if (!sessionId) return;
