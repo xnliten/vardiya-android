@@ -105,6 +105,45 @@
       </div>
     </div>
 
+    <!-- ═══ PAIR ANALYSIS MODAL ═══ -->
+    <div class="modal-overlay" id="pairModal">
+      <div class="modal-card pair-modal-card">
+        <div class="modal-header">
+          <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Birlikte Çalışanlar</h2>
+          <button class="modal-close" onclick="closePairModal()">✕</button>
+        </div>
+
+        <!-- Kişi Seçimi -->
+        <div class="pair-controls">
+          <select id="pairPersonSelect" onchange="onPairPersonChange()">
+            <option value="">Kişi Seçin...</option>
+          </select>
+        </div>
+
+        <!-- Filtre Chip'leri -->
+        <div class="pair-filters">
+          <div class="pair-filter-chips">
+            <button class="pair-chip selected" data-pfilter="all" onclick="setPairFilter('all')">Tümü</button>
+            <button class="pair-chip" data-pfilter="1" onclick="setPairFilter('1')">1</button>
+            <button class="pair-chip" data-pfilter="2" onclick="setPairFilter('2')">2</button>
+            <button class="pair-chip" data-pfilter="3" onclick="setPairFilter('3')">3</button>
+          </div>
+          <label class="pair-holiday-toggle">
+            <input type="checkbox" id="pairHolidayCheck" onchange="onPairPersonChange()">
+            <span>Hafta tatillerini de göster</span>
+          </label>
+        </div>
+
+        <!-- Sonuçlar -->
+        <div class="pair-results" id="pairResults">
+          <div class="pair-empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <p>Analiz için bir kişi seçin</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar-menu" id="sidebarMenu">
@@ -121,6 +160,9 @@
       <div class="sidebar-actions">
         <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span> İstatistikler
+        </button>
+        <button class="btn-sidebar" id="btnPairAnalysis" onclick="openPairModal(); toggleSidebar();">
+          <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Birlikte Çalışanlar
         </button>
         <button class="btn-sidebar" id="btnArchive" onclick="openArchiveModal(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg></span> Arşiv Listesi
@@ -1190,6 +1232,208 @@ function showPersonStats(name) {
     if (s && s !== '') counts[s] = (counts[s] || 0) + 1;
   });
   renderStatsGrid(counts);
+}
+
+// ═══ PAIR ANALYSIS (Birlikte Çalışanlar) ═══
+let pairFilter = 'all';
+const ACTIVE_SHIFTS = ['1', '2', '3'];
+
+function openPairModal() {
+  if (!vardiyaData) return alert('Analiz için önce veri yüklemelisiniz.');
+  
+  const select = $('#pairPersonSelect');
+  select.innerHTML = '<option value="">Kişi Seçin...</option>';
+  
+  const sorted = [...vardiyaData.personnel].sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  sorted.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = capitalize(p.name);
+    select.appendChild(opt);
+  });
+  
+  pairFilter = 'all';
+  document.querySelectorAll('.pair-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.pair-chip[data-pfilter="all"]').classList.add('selected');
+  $('#pairHolidayCheck').checked = false;
+  
+  $('#pairResults').innerHTML = `
+    <div class="pair-empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <p>Analiz için bir kişi seçin</p>
+    </div>`;
+  
+  $('#pairModal').classList.add('open');
+}
+
+function closePairModal() {
+  $('#pairModal').classList.remove('open');
+}
+
+function setPairFilter(f) {
+  pairFilter = f;
+  document.querySelectorAll('.pair-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.pair-chip[data-pfilter="${f}"]`).classList.add('selected');
+  onPairPersonChange();
+}
+
+function onPairPersonChange() {
+  const name = $('#pairPersonSelect').value;
+  if (!name) return;
+  analyzePairs(name);
+}
+
+function analyzePairs(selectedName) {
+  const showHolidays = $('#pairHolidayCheck').checked;
+  const selected = vardiyaData.personnel.find(p => p.name === selectedName);
+  if (!selected) return;
+  
+  const activeFilter = pairFilter === 'all' ? ACTIVE_SHIFTS : [pairFilter];
+  const daysInMonth = vardiyaData.headers.length;
+  
+  // Build results map
+  const results = {};
+  const neverWorked = [];
+  
+  vardiyaData.personnel.forEach(other => {
+    if (other.name === selectedName) return;
+    
+    const matchDays = [];
+    const holidayDays = [];
+    
+    for (let i = 0; i < daysInMonth; i++) {
+      const selShift = selected.shifts[i];
+      const othShift = other.shifts[i];
+      
+      // Active shift match
+      if (activeFilter.includes(selShift) && selShift === othShift) {
+        matchDays.push(i);
+      }
+      
+      // Holiday match
+      if (showHolidays && selShift === 'of' && othShift === 'of') {
+        holidayDays.push(i);
+      }
+    }
+    
+    if (matchDays.length > 0 || (showHolidays && holidayDays.length > 0)) {
+      results[other.name] = {
+        name: other.name,
+        shifts: other.shifts,
+        matchDays,
+        holidayDays,
+        count: matchDays.length
+      };
+    } else {
+      neverWorked.push(other.name);
+    }
+  });
+  
+  // Sort by count descending
+  const sorted = Object.values(results).sort((a, b) => b.count - a.count);
+  
+  renderPairResults(selected, sorted, neverWorked, showHolidays, daysInMonth);
+}
+
+function getShiftCellClass(shift) {
+  const cls = SHIFT_CLASSES[shift];
+  return cls || 's-default';
+}
+
+function renderPairResults(selected, matches, neverWorked, showHolidays, daysInMonth) {
+  const container = $('#pairResults');
+  
+  // Get month info for day labels
+  const headerText = $('#calendarHeader')?.textContent || '';
+  const monthNames = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  let currentMonth = new Date().getMonth();
+  monthNames.forEach((m, idx) => { if (headerText.includes(m)) currentMonth = idx; });
+  
+  // Build selected person's full shift row
+  const selectedShiftRow = selected.shifts.slice(0, daysInMonth).map((s, i) => {
+    const cls = getShiftCellClass(s);
+    const label = s ? s.toUpperCase() : '';
+    return `<div class="pair-cell ${cls}" title="${i+1}. gün">${label}</div>`;
+  }).join('');
+  
+  let html = `
+    <div class="pair-selected-card">
+      <div class="pair-person-header">
+        <div class="pair-person-name">${capitalize(selected.name)}</div>
+        <span class="pair-badge pair-badge-selected">Seçilen</span>
+      </div>
+      <div class="pair-shift-row">${selectedShiftRow}</div>
+    </div>`;
+  
+  if (matches.length === 0 && neverWorked.length === vardiyaData.personnel.length - 1) {
+    html += `
+      <div class="pair-empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+        <p>Beraber çalıştığınız herhangi bir kişi yoktur.</p>
+      </div>`;
+  } else {
+    // Matched people
+    matches.forEach(m => {
+      const shiftCells = m.shifts.slice(0, daysInMonth).map((s, i) => {
+        const isMatch = m.matchDays.includes(i);
+        const isHoliday = m.holidayDays.includes(i);
+        const cls = getShiftCellClass(s);
+        const label = s ? s.toUpperCase() : '';
+        const visClass = isMatch ? 'matched' : (isHoliday ? 'holiday-match' : 'hidden');
+        return `<div class="pair-cell ${cls} ${visClass}" title="${i+1}. gün" data-day="${i}">${label}</div>`;
+      }).join('');
+      
+      const holidayInfo = showHolidays && m.holidayDays.length > 0 
+        ? `<span class="pair-holiday-info">📅 Ortak tatil: ${m.holidayDays.length} gün</span>` 
+        : '';
+      
+      html += `
+        <div class="pair-person-card" data-person="${m.name}">
+          <div class="pair-person-header">
+            <div class="pair-person-name">${capitalize(m.name)}</div>
+            <div class="pair-person-meta">
+              ${holidayInfo}
+              <span class="pair-count">${m.count} gün</span>
+              <button class="pair-eye-btn" onclick="togglePairExpand(this)" title="Tüm vardiyaları göster/gizle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+          <div class="pair-shift-row">${shiftCells}</div>
+        </div>`;
+    });
+  }
+  
+  // Never worked together section
+  if (neverWorked.length > 0) {
+    const neverList = neverWorked.sort((a,b) => a.localeCompare(b, 'tr')).map(n => 
+      `<span class="pair-never-name">${capitalize(n)}</span>`
+    ).join('');
+    
+    html += `
+      <div class="pair-never-section">
+        <button class="pair-never-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          Hiç Birlikte Çalışılmayan Kişiler (${neverWorked.length})
+        </button>
+        <div class="pair-never-list">${neverList}</div>
+      </div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function togglePairExpand(btn) {
+  const card = btn.closest('.pair-person-card');
+  card.classList.toggle('expanded');
+  
+  // Toggle eye icon
+  const isExpanded = card.classList.contains('expanded');
+  if (isExpanded) {
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+  } else {
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+  }
 }
 
 if ('serviceWorker' in navigator) {

@@ -928,3 +928,294 @@ body::before {
 
 .btn-refresh-bar { background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); color: #3498db; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
 .btn-refresh-bar:hover { background: rgba(52, 152, 219, 0.25); }
+
+/* ══════════════════
+   PAIR ANALYSIS MODAL
+   ══════════════════ */
+.pair-modal-card {
+  max-width: 480px;
+  width: 95%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pair-controls { margin-bottom: 14px; }
+.pair-controls select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+}
+.pair-controls select:focus {
+  border-color: rgba(56,189,248,0.5);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+}
+.pair-controls select option { background: #1a2333; color: #fff; }
+
+.pair-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.pair-filter-chips { display: flex; gap: 6px; }
+.pair-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.pair-chip:hover { background: rgba(255,255,255,0.08); }
+.pair-chip.selected {
+  background: rgba(56,189,248,0.15);
+  border-color: rgba(56,189,248,0.4);
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.pair-holiday-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.pair-holiday-toggle input[type="checkbox"] {
+  accent-color: #38bdf8;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.pair-results {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+.pair-results::-webkit-scrollbar { width: 4px; }
+.pair-results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* Selected person card */
+.pair-selected-card {
+  background: linear-gradient(145deg, rgba(56,189,248,0.12), rgba(56,189,248,0.04));
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* Matched person card */
+.pair-person-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  transition: border-color 0.2s;
+}
+.pair-person-card:hover { border-color: rgba(255,255,255,0.15); }
+
+.pair-person-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.pair-person-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pair-person-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.pair-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.pair-badge-selected {
+  background: rgba(56,189,248,0.2);
+  color: #38bdf8;
+}
+.pair-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56,189,248,0.12);
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.pair-holiday-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pair-eye-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.pair-eye-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Shift row */
+.pair-shift-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.pair-cell {
+  width: 28px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 5px;
+  transition: opacity 0.25s, transform 0.25s;
+  flex-shrink: 0;
+}
+
+/* Shift color backgrounds */
+.pair-cell.s1 { background: var(--s1-bg); color: var(--s1); }
+.pair-cell.s2 { background: var(--s2-bg); color: var(--s2); }
+.pair-cell.s3 { background: var(--s3-bg); color: var(--s3); }
+.pair-cell.s4 { background: var(--s4-bg); color: var(--s4); }
+.pair-cell.sof { background: var(--sof-bg); color: var(--sof); }
+.pair-cell.sui { background: var(--sui-bg); color: var(--sui); }
+.pair-cell.smg { background: var(--smg-bg); color: var(--smg); }
+.pair-cell.sdr { background: var(--sdr-bg); color: var(--sdr); }
+.pair-cell.syi { background: var(--syi-bg); color: var(--syi); }
+.pair-cell.sei { background: var(--sei-bg); color: var(--sei); }
+.pair-cell.soi { background: var(--soi-bg); color: var(--soi); }
+.pair-cell.sdi { background: var(--sdi-bg); color: var(--sdi); }
+.pair-cell.sgt { background: var(--sgt-bg); color: var(--sgt); }
+.pair-cell.sbi { background: var(--sbi-bg); color: var(--sbi); }
+.pair-cell.shc { background: var(--shc-bg); color: var(--shc); }
+.pair-cell.sii { background: var(--sii-bg); color: var(--sii); }
+.pair-cell.s-default { background: rgba(255,255,255,0.03); color: var(--text-muted); }
+
+/* Hidden cells (no match) */
+.pair-cell.hidden {
+  opacity: 0;
+  width: 28px;
+  height: 26px;
+  pointer-events: none;
+}
+/* When card is expanded, show hidden cells */
+.pair-person-card.expanded .pair-cell.hidden {
+  opacity: 0.35;
+  pointer-events: auto;
+}
+
+/* Matched cells glow */
+.pair-cell.matched {
+  box-shadow: 0 0 8px rgba(56,189,248,0.3);
+  border: 1px solid rgba(56,189,248,0.3);
+}
+/* Keep matched cells highlighted when expanded */
+.pair-person-card.expanded .pair-cell.matched {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(56,189,248,0.4);
+}
+
+/* Holiday match cells */
+.pair-cell.holiday-match {
+  border: 1px dashed rgba(239,68,68,0.4);
+}
+.pair-person-card.expanded .pair-cell.holiday-match {
+  opacity: 0.8;
+}
+
+/* Empty state */
+.pair-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Never worked section */
+.pair-never-section {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 10px;
+}
+.pair-never-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  transition: color 0.2s;
+}
+.pair-never-toggle:hover { color: var(--text-secondary); }
+.pair-never-toggle svg { transition: transform 0.25s; }
+.pair-never-section.open .pair-never-toggle svg { transform: rotate(180deg); }
+
+.pair-never-list {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 4px 4px;
+}
+.pair-never-section.open .pair-never-list { display: flex; }
+
+.pair-never-name {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
