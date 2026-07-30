@@ -43,9 +43,28 @@
 
   --border: rgba(255,255,255,0.06);
   --border-accent: rgba(239,68,68,0.3);
-  --radius: 10px;
-  --radius-lg: 14px;
+  --radius: 8px;
+  --radius-lg: 12px;
   --radius-full: 999px;
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-glass: rgba(0,0,0,0.04);
+  --bg-glass-hover: rgba(0,0,0,0.08);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --theme-primary: #ef4444;
+  --theme-primary-glow: rgba(239,68,68,0.15);
+
+  --border: rgba(0,0,0,0.1);
+  --border-accent: rgba(239,68,68,0.3);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -491,12 +510,12 @@ body::before {
 
 .results-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  padding-bottom: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
-  gap: 6px;
+  gap: 10px;
 }
 
 .results-left {
@@ -505,13 +524,14 @@ body::before {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .results-actions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 12px;
 }
 
@@ -519,6 +539,7 @@ body::before {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
 }
 .search-wrapper svg {
   position: absolute;
@@ -531,14 +552,13 @@ body::before {
   color: var(--text-primary);
   border-radius: var(--radius);
   padding: 6px 10px 6px 32px;
-  font-size: 12px;
+  font-size: 13px;
   font-family: inherit;
-  width: 140px;
+  width: 100%;
   transition: all 0.2s;
   outline: none;
 }
 .search-input:focus {
-  width: 180px;
   border-color: rgba(56, 189, 248, 0.5);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
   background: rgba(255, 255, 255, 0.08);
@@ -1254,30 +1274,25 @@ body::before {
   height: 38px;
   pointer-events: none;
 }
-/* When card is expanded, show hidden cells normally */
+/* When card is expanded, show hidden cells normally, but as unmatched (grayscale) */
 .pair-person-card.expanded .pair-cell.hidden {
   opacity: 1;
   pointer-events: auto;
+  background: var(--bg-glass) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border) !important;
 }
 
-/* Matched cells glow */
+/* Matched cells (Normal Colors) */
 .pair-cell.matched {
-  box-shadow: 0 0 10px rgba(56,189,248,0.4);
-  border: 1px solid rgba(56,189,248,0.5);
+  /* No glow, just normal shift colors */
   position: relative;
   z-index: 2;
-}
-/* Keep matched cells highlighted when expanded */
-.pair-person-card.expanded .pair-cell.matched {
-  box-shadow: 0 0 12px rgba(56,189,248,0.5);
 }
 
 /* Holiday match cells */
 .pair-cell.holiday-match {
   border: 1px dashed rgba(239,68,68,0.4);
-}
-.pair-person-card.expanded .pair-cell.holiday-match {
-  opacity: 0.8;
 }
 
 /* Empty state */
