@@ -203,7 +203,7 @@
         <div class="sidebar-profile">
           <img id="sidebarProfileImg" src="" alt="" style="display: none;">
           <div class="sidebar-profile-info">
-            <h3 id="sidebarUserName">Hoş geldiniz</h3>
+            <h3 id="sidebarUserName"></h3>
           </div>
         </div>
         <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
@@ -308,6 +308,7 @@
           <div class="results-bar">
             <div class="results-left">
               <span class="results-title" id="resultsTitle">Bir tarih seçin</span>
+              <span class="results-count" id="resultsCount"></span>
             </div>
             <div class="results-actions">
               <div class="search-wrapper">
@@ -559,7 +560,7 @@ function updateLoginState() {
         sidebarProfileImg.style.display = 'block';
       }
     } else {
-      sidebarUserName.textContent = 'Hoş geldiniz';
+      sidebarUserName.textContent = '';
       if (sidebarProfileImg) sidebarProfileImg.style.display = 'none';
     }
   }
@@ -990,7 +991,7 @@ function updateResults() {
   const nextLabelText = nextDayNum <= vardiyaData.headers.length ? `${nextDayNum} ${monthNames[currentMonth]}`.trim() : `${nextDayNum}. gün`;
 
   if (selectedShift === 'all') {
-    resultsTitle.textContent = `${dateStr} — Toplam: ${filtered.length} Kişi`;
+    resultsTitle.textContent = `${dateStr}`;
   } else {
     const shiftLabel = SHIFT_LABELS[selectedShift] || selectedShift.toUpperCase();
     
@@ -1001,7 +1002,11 @@ function updateResults() {
     else if(selectedShift === '4') shiftTime = "(08-18)";
     else shiftTime = "";
     
-    resultsTitle.textContent = `${dateStr} — ${shiftLabel} ${shiftTime} — Toplam: ${filtered.length} Kişi`;
+    resultsTitle.textContent = `${dateStr} — ${shiftLabel} ${shiftTime}`;
+  }
+  
+  if (resultsCount) {
+    resultsCount.textContent = `${filtered.length} kişi`;
   }
 
   if (filtered.length === 0) {
