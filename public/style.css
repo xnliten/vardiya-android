@@ -48,24 +48,7 @@
   --radius-full: 999px;
 }
 
-/* Light Theme Variables */
-[data-theme="light"] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-glass: rgba(0,0,0,0.04);
-  --bg-glass-hover: rgba(0,0,0,0.08);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-
-  --theme-primary: #ef4444;
-  --theme-primary-glow: rgba(239,68,68,0.15);
-
-  --border: rgba(0,0,0,0.1);
-  --border-accent: rgba(239,68,68,0.3);
-}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

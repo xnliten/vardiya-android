@@ -239,9 +239,6 @@
       </div>
       <div class="sidebar-bottom">
         <div class="sidebar-data-status" id="dataStatus">Henüz veri yüklenmedi</div>
-        <button class="btn-sidebar" id="btnThemeToggle" onclick="toggleTheme()">
-          <span class="icon" id="themeIcon">☀️</span> <span id="themeLabel">Açık Tema</span>
-        </button>
       </div>
     </aside>
 
@@ -578,29 +575,7 @@ function updateLoginState() {
   }
 }
 
-// ═══ Theme Toggle ═══
-function initTheme() {
-  const savedTheme = localStorage.getItem('vrd_theme') || 'dark';
-  if (savedTheme === 'light') {
-    document.body.setAttribute('data-theme', 'light');
-    $('#themeIcon').textContent = '🌙';
-    $('#themeLabel').textContent = 'Koyu Tema';
-  }
-}
-function toggleTheme() {
-  const isLight = document.body.getAttribute('data-theme') === 'light';
-  if (isLight) {
-    document.body.removeAttribute('data-theme');
-    localStorage.setItem('vrd_theme', 'dark');
-    $('#themeIcon').textContent = '☀️';
-    $('#themeLabel').textContent = 'Açık Tema';
-  } else {
-    document.body.setAttribute('data-theme', 'light');
-    localStorage.setItem('vrd_theme', 'light');
-    $('#themeIcon').textContent = '🌙';
-    $('#themeLabel').textContent = 'Koyu Tema';
-  }
-}
+// ═══ Theme Toggle Removed ═══
 
 // ═══ Fetch Data ═══
 refreshBtn.addEventListener('click', () => {
@@ -1704,7 +1679,6 @@ function renderCompareTable(archive) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
   initAuth();
   fetchData();
 });
