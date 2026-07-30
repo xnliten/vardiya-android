@@ -782,8 +782,22 @@ body::before {
   
   .refresh-text { display: inline-block; font-size: 11px; }
   .btn-refresh-bar { padding: 6px 10px; border-radius: 8px; gap: 6px; min-width: 80px; justify-content: center; display: flex; align-items: center; }
-  .results-bar { flex-wrap: nowrap; gap: 5px; }
-  .results-title { font-size: 0.75rem; }
+  .results-bar { flex-wrap: wrap; gap: 8px; }
+  .results-left { width: 100%; flex-shrink: 0; }
+  .results-title { font-size: 0.85rem; }
+  
+  /* Pair View Mobile Fixes */
+  .pair-view-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pair-person-header {
+    flex-wrap: wrap;
+  }
+  .pair-person-name {
+    width: 100%;
+    margin-bottom: 4px;
+  }
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
