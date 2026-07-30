@@ -555,9 +555,21 @@ function updateLoginState() {
 
     if (isOnline) {
       sidebarUserName.textContent = storedFullname || 'Bilgiler yükleniyor...';
-      if (storedPhoto && sidebarProfileImg) {
-        sidebarProfileImg.src = storedPhoto;
+      if (sidebarProfileImg) {
+        if (storedPhoto && storedPhoto !== 'null' && storedPhoto !== 'undefined') {
+          sidebarProfileImg.src = storedPhoto;
+        } else {
+          const initName = storedFullname ? encodeURIComponent(storedFullname) : 'Kullanıcı';
+          sidebarProfileImg.src = `https://ui-avatars.com/api/?name=${initName}&background=1f2937&color=38bdf8&size=128&bold=true`;
+        }
         sidebarProfileImg.style.display = 'block';
+        
+        // On error, fallback to avatar
+        sidebarProfileImg.onerror = function() {
+          const initName = storedFullname ? encodeURIComponent(storedFullname) : 'Kullanıcı';
+          sidebarProfileImg.src = `https://ui-avatars.com/api/?name=${initName}&background=1f2937&color=38bdf8&size=128&bold=true`;
+          sidebarProfileImg.onerror = null; // prevent infinite loop
+        };
       }
     } else {
       sidebarUserName.textContent = '';
