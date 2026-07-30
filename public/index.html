@@ -105,14 +105,18 @@
       </div>
     </div>
 
-    <!-- ═══ PAIR ANALYSIS MODAL ═══ -->
-    <div class="modal-overlay" id="pairModal">
-      <div class="modal-card pair-modal-card">
-        <div class="modal-header">
-          <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Birlikte Çalışanlar</h2>
-          <button class="modal-close" onclick="closePairModal()">✕</button>
+    <!-- ═══ PAIR ANALYSIS VIEW ═══ -->
+    <div class="pair-view-container" id="pairView" style="display: none;">
+      <div class="pair-view-header">
+        <div class="pair-view-title">
+          <button class="btn-back" onclick="closePairView()" title="Geri Dön">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <h2>Birlikte Çalışanlar</h2>
         </div>
+      </div>
 
+      <div class="pair-view-content">
         <!-- Kişi Seçimi -->
         <div class="pair-controls">
           <select id="pairPersonSelect" onchange="onPairPersonChange()">
@@ -144,6 +148,7 @@
       </div>
     </div>
 
+
     <!-- ═══ SIDEBAR (Hamburger Menu) ═══ -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar-menu" id="sidebarMenu">
@@ -161,7 +166,7 @@
         <button class="btn-sidebar" id="btnStats" onclick="openStatsModal(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span> İstatistikler
         </button>
-        <button class="btn-sidebar" id="btnPairAnalysis" onclick="openPairModal(); toggleSidebar();">
+        <button class="btn-sidebar" id="btnPairAnalysis" onclick="openPairView(); toggleSidebar();">
           <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Birlikte Çalışanlar
         </button>
         <button class="btn-sidebar" id="btnArchive" onclick="openArchiveModal(); toggleSidebar();">
@@ -238,12 +243,17 @@
               <span class="results-title" id="resultsTitle">Bir tarih seçin</span>
               <span class="results-count" id="resultsCount"></span>
             </div>
-            <button class="btn-refresh-bar" id="refreshBtn" title="Verileri Güncelle">
+            <div class="results-actions">
+              <div class="search-wrapper">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="personSearchInput" class="search-input" placeholder="Kişi ara..." oninput="updateResults()">
+              </div>
+              <button class="btn-refresh-bar" id="refreshBtn" title="Verileri Güncelle">
               <span class="refresh-icon" id="refreshIcon">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
               </span>
-              <span class="refresh-text" style="font-weight: 600;">Güncelle</span>
-            </button>
+              </button>
+            </div>
           </div>
           <ul class="person-list" id="personList"></ul>
           <div class="results-empty" id="resultsEmpty">
@@ -860,8 +870,12 @@ function updateResults() {
   }
 
   const dayIndex = selectedDay - 1;
+  const searchInput = document.getElementById('personSearchInput');
+  const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
   let filtered = vardiyaData.personnel.filter(p => {
+    if (searchQuery && !p.name.toLowerCase().includes(searchQuery)) return false;
+    
     if (dayIndex >= p.shifts.length) return false;
     const sv = p.shifts[dayIndex];
     if (selectedShift === 'all') return sv !== '' && sv !== undefined && sv !== null;
@@ -1238,7 +1252,7 @@ function showPersonStats(name) {
 let pairFilter = 'all';
 const ACTIVE_SHIFTS = ['1', '2', '3'];
 
-function openPairModal() {
+function openPairView() {
   if (!vardiyaData) return alert('Analiz için önce veri yüklemelisiniz.');
   
   const select = $('#pairPersonSelect');
@@ -1263,11 +1277,16 @@ function openPairModal() {
       <p>Analiz için bir kişi seçin</p>
     </div>`;
   
-  $('#pairModal').classList.add('open');
+  // Hide main content, show pair view
+  document.querySelector('.calendar-container').style.display = 'none';
+  document.querySelector('.content-panel').style.display = 'none';
+  $('#pairView').style.display = 'flex';
 }
 
-function closePairModal() {
-  $('#pairModal').classList.remove('open');
+function closePairView() {
+  document.querySelector('.calendar-container').style.display = '';
+  document.querySelector('.content-panel').style.display = 'flex';
+  $('#pairView').style.display = 'none';
 }
 
 function setPairFilter(f) {
@@ -1353,7 +1372,7 @@ function renderPairResults(selected, matches, neverWorked, showHolidays, daysInM
   const selectedShiftRow = selected.shifts.slice(0, daysInMonth).map((s, i) => {
     const cls = getShiftCellClass(s);
     const label = s ? s.toUpperCase() : '';
-    return `<div class="pair-cell ${cls}" title="${i+1}. gün">${label}</div>`;
+    return `<div class="pair-cell ${cls}" title="${i+1}. gün"><span class="pair-cell-day">${i+1}</span><span class="pair-cell-shift">${label}</span></div>`;
   }).join('');
   
   let html = `
@@ -1380,7 +1399,7 @@ function renderPairResults(selected, matches, neverWorked, showHolidays, daysInM
         const cls = getShiftCellClass(s);
         const label = s ? s.toUpperCase() : '';
         const visClass = isMatch ? 'matched' : (isHoliday ? 'holiday-match' : 'hidden');
-        return `<div class="pair-cell ${cls} ${visClass}" title="${i+1}. gün" data-day="${i}">${label}</div>`;
+        return `<div class="pair-cell ${cls} ${visClass}" title="${i+1}. gün" data-day="${i}"><span class="pair-cell-day">${i+1}</span><span class="pair-cell-shift">${label}</span></div>`;
       }).join('');
       
       const holidayInfo = showHolidays && m.holidayDays.length > 0 

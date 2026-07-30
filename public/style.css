@@ -509,6 +509,44 @@ body::before {
   min-width: 0;
 }
 
+.results-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-wrapper svg {
+  position: absolute;
+  left: 10px;
+  pointer-events: none;
+}
+.search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: var(--radius);
+  padding: 6px 10px 6px 32px;
+  font-size: 12px;
+  font-family: inherit;
+  width: 140px;
+  transition: all 0.2s;
+  outline: none;
+}
+.search-input:focus {
+  width: 180px;
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+}
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
 .results-title {
   font-size: 0.85rem;
   font-weight: 700;
@@ -930,14 +968,59 @@ body::before {
 .btn-refresh-bar:hover { background: rgba(52, 152, 219, 0.25); }
 
 /* ══════════════════
-   PAIR ANALYSIS MODAL
+   PAIR ANALYSIS VIEW
    ══════════════════ */
-.pair-modal-card {
-  max-width: 480px;
-  width: 95%;
-  max-height: 85vh;
+.pair-view-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.pair-view-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-secondary);
+}
+
+.pair-view-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pair-view-title h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.btn-back:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.pair-view-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
 }
 
 .pair-controls { margin-bottom: 14px; }
@@ -1104,15 +1187,26 @@ body::before {
 }
 .pair-cell {
   width: 28px;
-  height: 26px;
+  height: 38px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
   border-radius: 5px;
-  transition: opacity 0.25s, transform 0.25s;
+  transition: opacity 0.25s, transform 0.25s, box-shadow 0.2s;
   flex-shrink: 0;
+  gap: 2px;
+}
+.pair-cell-day {
+  font-size: 9px;
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 1;
+}
+.pair-cell-shift {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Shift color backgrounds */
@@ -1138,24 +1232,25 @@ body::before {
 .pair-cell.hidden {
   opacity: 0;
   width: 28px;
-  height: 26px;
+  height: 38px;
   pointer-events: none;
 }
-/* When card is expanded, show hidden cells */
+/* When card is expanded, show hidden cells normally */
 .pair-person-card.expanded .pair-cell.hidden {
-  opacity: 0.35;
+  opacity: 1;
   pointer-events: auto;
 }
 
 /* Matched cells glow */
 .pair-cell.matched {
-  box-shadow: 0 0 8px rgba(56,189,248,0.3);
-  border: 1px solid rgba(56,189,248,0.3);
+  box-shadow: 0 0 10px rgba(56,189,248,0.4);
+  border: 1px solid rgba(56,189,248,0.5);
+  position: relative;
+  z-index: 2;
 }
 /* Keep matched cells highlighted when expanded */
 .pair-person-card.expanded .pair-cell.matched {
-  opacity: 1;
-  box-shadow: 0 0 10px rgba(56,189,248,0.4);
+  box-shadow: 0 0 12px rgba(56,189,248,0.5);
 }
 
 /* Holiday match cells */
