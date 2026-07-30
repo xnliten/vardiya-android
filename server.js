@@ -272,7 +272,9 @@ async function fetchProfilData(cookies) {
     '.widget-user-image img',
     'img[src*="Profil"]',
     'img[src*="Uploads"]',
-    'img[src*="avatar"]'
+    'img[src*="avatar"]',
+    'img[src*="PersonelFoto"]',
+    'img.img-responsive'
   ];
   
   for (const sel of imgSelectors) {

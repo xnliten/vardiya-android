@@ -522,9 +522,10 @@ body::before {
   display: flex;
   flex-direction: row;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   width: 100%;
+  overflow: hidden;
 }
 
 .results-actions {
@@ -572,6 +573,9 @@ body::before {
   font-weight: 700;
   color: #f1f5f9;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .results-count {
@@ -581,6 +585,8 @@ body::before {
   background: var(--theme-primary-glow);
   padding: 2px 8px;
   border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .results-empty {
