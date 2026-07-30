@@ -238,6 +238,11 @@
 
     <!-- ═══ MAIN CONTENT ═══ -->
     <div class="main-layout">
+      <!-- Print Header (Phase 6) -->
+      <div class="print-header" style="display: none;">
+        <h1 id="printHeaderTitle">Vardiya Çizelgesi</h1>
+        <p id="printHeaderDate">Yazdırılma Tarihi: ...</p>
+      </div>
 
       <!-- ═══ HORIZONTAL CALENDAR ═══ -->
       <div class="calendar-container">
@@ -742,6 +747,9 @@ function renderCalendar() {
   
   // Also render horizontal calendar
   renderHorizontalCalendar(currentMonth, currentYear);
+  
+  // Update Print Header
+  updatePrintHeader(calendarHeader.textContent);
 }
 
 // ═══ UI Toggles ═══
@@ -924,10 +932,10 @@ function updateResults() {
 
   const dayIndex = selectedDay - 1;
   const searchInput = document.getElementById('personSearchInput');
-  const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const searchQuery = searchInput ? trToLowerCase(searchInput.value.trim()) : '';
 
   let filtered = vardiyaData.personnel.filter(p => {
-    if (searchQuery && !p.name.toLowerCase().includes(searchQuery)) return false;
+    if (searchQuery && !trToLowerCase(p.name).includes(searchQuery)) return false;
     
     if (dayIndex >= p.shifts.length) return false;
     const sv = p.shifts[dayIndex];
@@ -1090,6 +1098,20 @@ function sortLeaveBarChips(counts) {
 
 function capitalize(str) {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function trToLowerCase(str) {
+  return str.replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
+}
+
+function updatePrintHeader(title) {
+  const printTitle = document.getElementById('printHeaderTitle');
+  const printDate = document.getElementById('printHeaderDate');
+  if(printTitle) printTitle.textContent = title;
+  if(printDate) {
+    const now = new Date();
+    printDate.textContent = `Çıktı Alınma Tarihi: ${now.toLocaleDateString('tr-TR')} ${now.toLocaleTimeString('tr-TR')} | Dönem: ${title}`;
+  }
 }
 
 function showError(msg) {
@@ -1590,6 +1612,8 @@ function renderCompareTable(archive) {
   
   const thead = $('#compareTableHead');
   const tbody = $('#compareTableBody');
+  
+  updatePrintHeader(`Arşiv Karşılaştırma: Güncel vs ${archive.name}`);
   
   const daysInMonth = Math.max(vardiyaData.headers.length, archive.data.headers.length);
   
