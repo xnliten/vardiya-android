@@ -470,7 +470,6 @@ function closeLoginModal() {
   loginModal.classList.remove('open');
 }
 
-// Event listener for loginTop is at the end of file
 
 async function fetchProfile() {
   if (!sessionId) return;
@@ -502,7 +501,7 @@ async function fetchProfile() {
         }
       }
 
-      const imgSelectors = ['img.profile-user-img', 'img.img-circle', '.widget-user-image img', 'img[src*="Profil"]', 'img[src*="Uploads"]', 'img[src*="avatar"]', 'img[src*="PersonelFoto"]', 'img.img-responsive'];
+      const imgSelectors = ['img[src*="PersonelFoto"]', 'img.img-circle', 'img.img-responsive', 'img.profile-user-img', '.widget-user-image img', 'img[src*="Profil"]', 'img[src*="Uploads"]', 'img[src*="avatar"]'];
       for (const sel of imgSelectors) {
         const el = doc.querySelector(sel);
         if (el) {
@@ -575,7 +574,6 @@ function updateLoginState() {
   }
 }
 
-// ═══ Theme Toggle Removed ═══
 
 // ═══ Fetch Data ═══
 refreshBtn.addEventListener('click', () => {
@@ -715,9 +713,6 @@ function renderCalendar() {
     if (monthMatch) currentMonth = parseInt(monthMatch[1], 10) - 1;
   }
 
-  const titleMatch = document.querySelector('title')?.innerText || '';
-  const yearMatch = titleMatch.match(/20\d{2}/);
-  if (yearMatch) currentYear = parseInt(yearMatch[0], 10);
 
   calendarHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
@@ -1153,16 +1148,6 @@ function updateDataStatus() {
   }
 }
 
-// ═══ Init ═══
-(function init() {
-  updateLoginState();
-
-  if (vardiyaData) {
-    renderCalendar();
-    updateResults();
-  }
-  updateDataStatus();
-})();
 // ═══ ARCHIVE LOGIC ═══
 let archives = JSON.parse(localStorage.getItem('vrd_archives') || '[]');
 let deleteTargetId = null;
@@ -1671,7 +1656,12 @@ function renderCompareTable(archive) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initAuth();
+  updateLoginState();
+  if (vardiyaData) {
+    renderCalendar();
+    updateResults();
+  }
+  updateDataStatus();
   fetchData();
 });
 

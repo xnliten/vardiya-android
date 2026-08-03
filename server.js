@@ -161,7 +161,7 @@ async function fetchVardiyaData(cookies) {
   const $ = cheerio.load(res.body);
 
   // Extract month/year from caption
-  require('fs').writeFileSync('epms_full.html', res.body);
+
   const captionText = $('div.caption')
     .filter(function () {
       return $(this).text().includes('Planlanan Vardiya');
@@ -193,13 +193,6 @@ async function fetchVardiyaData(cookies) {
       if (i === 0) return; // Skip name column
       const cellText = $(this).text().trim().toLowerCase();
       shifts.push(cellText);
-      const style = $(this).attr('style');
-      const clazz = $(this).attr('class');
-      if (cellText && style && style !== '') {
-        require('fs').appendFileSync('epms_colors.txt', cellText + ' -> ' + style + ' | class: ' + clazz + '\n');
-      } else if (cellText && clazz) {
-        require('fs').appendFileSync('epms_colors.txt', cellText + ' -> class: ' + clazz + '\n');
-      }
     });
 
     if (name) {
@@ -267,14 +260,14 @@ async function fetchProfilData(cookies) {
 
   let photoUrl = '';
   const imgSelectors = [
-    'img.profile-user-img',
+    'img[src*="PersonelFoto"]',
     'img.img-circle',
+    'img.img-responsive',
+    'img.profile-user-img',
     '.widget-user-image img',
     'img[src*="Profil"]',
     'img[src*="Uploads"]',
-    'img[src*="avatar"]',
-    'img[src*="PersonelFoto"]',
-    'img.img-responsive'
+    'img[src*="avatar"]'
   ];
   
   for (const sel of imgSelectors) {
@@ -294,28 +287,44 @@ async function fetchProfilData(cookies) {
   if (photoUrl) {
     try {
       const imgRes = await new Promise((resolve, reject) => {
-         const parsed = new URL(photoUrl);
-         const reqOptions = {
-           hostname: parsed.hostname,
-           port: parsed.port || 443,
-           path: parsed.pathname + parsed.search,
-           method: 'GET',
-           headers: { 'Cookie': cookies, 'Referer': `${BASE}/Portal/Home/Profil` },
-           rejectUnauthorized: false
-         };
-         https.get(reqOptions, (r) => {
-           if (r.statusCode !== 200) {
+         const fetchImage = (url, redirectCount = 0) => {
+           if (redirectCount > 3) { resolve(null); return; }
+           const parsed = new URL(url);
+           const reqOptions = {
+             hostname: parsed.hostname,
+             port: parsed.port || 443,
+             path: parsed.pathname + parsed.search,
+             method: 'GET',
+             headers: { 'Cookie': cookies, 'Referer': `${BASE}/Portal/Home/Profil` },
+             rejectUnauthorized: false
+           };
+           https.get(reqOptions, (r) => {
+             // Follow redirects
+             if ((r.statusCode === 301 || r.statusCode === 302) && r.headers.location) {
+               let loc = r.headers.location;
+               if (!loc.startsWith('http')) loc = BASE + (loc.startsWith('/') ? '' : '/') + loc;
+               fetchImage(loc, redirectCount + 1);
+               return;
+             }
+             if (r.statusCode !== 200) {
+               console.error('Profile image fetch status:', r.statusCode);
+               resolve(null);
+               return;
+             }
+             const chunks = [];
+             r.on('data', c => chunks.push(c));
+             r.on('end', () => {
+                const buffer = Buffer.concat(chunks);
+                if (buffer.length < 100) { resolve(null); return; } // Too small, not a real image
+                const type = r.headers['content-type'] || 'image/jpeg';
+                resolve(`data:${type};base64,${buffer.toString('base64')}`);
+             });
+           }).on('error', (e) => {
+             console.error('Profile image fetch error:', e.message);
              resolve(null);
-             return;
-           }
-           const chunks = [];
-           r.on('data', c => chunks.push(c));
-           r.on('end', () => {
-              const buffer = Buffer.concat(chunks);
-              const type = r.headers['content-type'] || 'image/jpeg';
-              resolve(`data:${type};base64,${buffer.toString('base64')}`);
            });
-         }).on('error', reject);
+         };
+         fetchImage(photoUrl);
       });
       if (imgRes) {
         photoBase64 = imgRes;
