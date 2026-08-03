@@ -516,6 +516,26 @@ async function fetchProfile() {
           }
         }
       }
+
+      if (photoUrl) {
+        try {
+          const imgRes = await fetch(photoUrl);
+          if (imgRes.ok) {
+            const blob = await imgRes.blob();
+            photoUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result || '');
+              reader.onerror = () => resolve('');
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            photoUrl = '';
+          }
+        } catch (imgErr) {
+          console.error('[Profil] Native photo base64 fetch failed:', imgErr);
+          photoUrl = '';
+        }
+      }
     }
 
     if (fullName) {
