@@ -278,9 +278,14 @@ async function fetchProfilData(cookies) {
         if (!photoUrl.startsWith('http')) {
           photoUrl = BASE + (photoUrl.startsWith('/') ? '' : '/') + photoUrl;
         }
+        console.log('[Profil] Found photo URL via selector:', sel, '->', photoUrl);
         break;
       }
     }
+  }
+  
+  if (!photoUrl) {
+    console.log('[Profil] No photo URL found in any selector');
   }
 
   let photoBase64 = null;
@@ -334,6 +339,7 @@ async function fetchProfilData(cookies) {
     }
   }
 
+  console.log('[Profil] Result:', { fullName, hasBase64: !!photoBase64, photoUrl });
   return { fullName, photoBase64, photoUrl };
 }
 

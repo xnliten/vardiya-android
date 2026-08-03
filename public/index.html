@@ -484,7 +484,9 @@ async function fetchProfile() {
       if (res.ok) {
         const data = await res.json();
         fullName = data.fullName;
-        photoUrl = data.photoBase64 || data.photoUrl; // For web, use base64 if available to avoid CORS
+        // Only use base64 — raw EPMS URLs won't load in browser (no cookies)
+        photoUrl = data.photoBase64 || '';
+        console.log('[Profil] Server returned:', { fullName, hasPhoto: !!data.photoBase64 });
       }
     } else {
       const res = await fetch('https://yeniceri.epms.com.tr/Portal/Home/Profil');
@@ -522,7 +524,12 @@ async function fetchProfile() {
       localStorage.setItem('vrd_user_fullname', localStorage.getItem('vrd_user') || 'Kullanıcı');
     }
     
-    if (photoUrl) localStorage.setItem('vrd_user_photo', photoUrl);
+    if (photoUrl) {
+      localStorage.setItem('vrd_user_photo', photoUrl);
+    } else {
+      // Clear old invalid photo URL so fallback avatar shows cleanly
+      localStorage.removeItem('vrd_user_photo');
+    }
     updateLoginState();
   } catch (e) {
     console.error('Profil fetch failed', e);
